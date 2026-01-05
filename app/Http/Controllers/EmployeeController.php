@@ -32,6 +32,8 @@ class EmployeeController extends Controller
         'password' => Hash::make($data['password']),
     ]);
 
+    $user->assignRole('Employee');
+
     $data['user_id'] = $user->id;
 
     $data['password'] = Hash::make($data['password']);
