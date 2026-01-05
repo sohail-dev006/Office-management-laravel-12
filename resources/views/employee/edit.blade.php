@@ -42,7 +42,8 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="designation" class="form-label">Designation</label>
-                                <input name="designation" id="designation" class="form-control @error('designation') is-invalid @enderror" placeholder="Designation" value="{{ old('designation') }}">
+                                <input name="designation" id="designation" class="form-control @error('designation') is-invalid @enderror" placeholder="Designation" value="{{ old('designation', $employee->designation) }}">
+
                                 @error('designation')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror

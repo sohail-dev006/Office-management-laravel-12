@@ -23,6 +23,7 @@ class Employee extends Model
         'salary',
         'status',
         'age',
+        'user_id',
     ];
 
     protected $hidden = ['password'];
@@ -40,6 +41,10 @@ class Employee extends Model
     public function leaves()
     {
         return $this->hasMany(Leave::class);
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
 

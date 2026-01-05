@@ -7,6 +7,7 @@ use App\Http\Resources\EmployeeResources;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 class EmployeeController extends Controller
 {
@@ -21,15 +22,25 @@ class EmployeeController extends Controller
         return view('employee.create');
     }
 
-    public function store(StoreEmployeeRequest  $request)
-    {
-        $data = $request->validated();
-        $data['password'] = Hash::make($data['password']); 
+    public function store(StoreEmployeeRequest $request)
+{
+    $data = $request->validated();
 
-        Employee::create($data);
+    $user = User::create([
+        'name' => $data['first_name'] . ' ' . $data['last_name'],
+        'email' => $data['email'],
+        'password' => Hash::make($data['password']),
+    ]);
 
-        return redirect()->route('employee.index');
-    }
+    $data['user_id'] = $user->id;
+
+    $data['password'] = Hash::make($data['password']);
+
+    Employee::create($data);
+
+    return redirect()->route('employee.index');
+}
+
 
     public function edit(Employee $employee)
     {
