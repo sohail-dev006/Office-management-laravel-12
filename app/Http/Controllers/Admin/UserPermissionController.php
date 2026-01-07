@@ -100,4 +100,11 @@ class UserPermissionController extends Controller
         return redirect()->route('admin.users')->with('success', 'User created successfully');
     }
 
+    public function destroy(User $user)
+    {
+        $user->delete();
+        return redirect()->route('admin.users')->with('success', 'User deleted successfully');
+    }
+
+
 }

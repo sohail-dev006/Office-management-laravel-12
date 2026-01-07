@@ -6,46 +6,78 @@ use App\Models\Employee;
 use App\Models\Salary;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use GuzzleHttp\Middleware;
-
+use Barryvdh\DomPDF\Facade\Pdf;
 
 
 class SalaryController extends Controller
 {
-    public static function middleware(): array
-    {
-        return [
-            new Middleware('role:admin', only: [
-                'create',
-                'store',
-                'edit',
-                'update',
-                'destroy'
-            ]),
-        ];
-    }
-
-    // public function index($month = null, $year = null)
+    // public function __construct()
     // {
-    //     $month = $month ?? now()->month;
-    //     $year = $year ?? now()->year;
-
-
-    //     $salaries = Salary::with('employee')
-    //         ->where('month', $month)
-    //         ->where('year', $year)
-    //         ->get();
-
-    //     return view('salary.index', compact('salaries', 'month', 'year'));
+    //     // Only admin can create, edit, delete salaries
+    //     $this->middleware('role:admin')->only(['create', 'store', 'edit', 'update', 'destroy']);
+    //     // All logged-in users can view index and generate their own salary
+    //     $this->middleware('auth');
     // }
 
+    public function index(Request $request)
+    {
+        $month = $request->month ?? now()->month;
+        $year  = $request->year ?? now()->year;
 
+        $query = Salary::with('employee')
+            ->where('month', $month)
+            ->where('year', $year);
+            
+
+        // if (!auth()->user()->hasRole('admin')) {
+        //     $query->where('employee_id', auth()->user()->employee?->id);
+        // }
+
+        $salaries = $query->get();
+
+        return view('salary.index', compact('salaries','month','year'));
+    }
+
+
+
+    // Show form to create salary
     public function create()
     {
         $employees = Employee::orderBy('first_name')->get();
-
         return view('salary.create', compact('employees'));
     }
+
+    // Store new salary
+    // public function store(Request $request)
+    // {
+    //     $data = $request->validate([
+    //         'employee_id' => 'required|exists:employees,id',
+    //         'month' => 'required|numeric|min:1|max:12',
+    //         'year' => 'required|numeric|min:2000',
+    //         'gross_salary' => 'required|numeric|min:0',
+    //     ]);
+
+    //     $employee = Employee::findOrFail($data['employee_id']);
+    //     $workingDays = $this->workingDays($data['month'], $data['year']);
+
+    //     // For simplicity, deduction = 0 for now
+    //     $deduction = 0;
+    //     $netSalary = $data['gross_salary'] - $deduction;
+
+    //     Salary::create([
+    //         'employee_id' => $employee->id,
+    //         'month' => $data['month'],
+    //         'year' => $data['year'],
+    //         'working_days' => $workingDays,
+    //         'present_days' => 0,
+    //         'absent_days' => 0,
+    //         'gross_salary' => $data['gross_salary'],
+    //         'deduction' => $deduction,
+    //         'net_salary' => $netSalary,
+    //     ]);
+
+    //     return redirect()->route('salary.index')->with('success', 'Salary created successfully!');
+    // }
 
     public function store(Request $request)
     {
@@ -53,29 +85,62 @@ class SalaryController extends Controller
             'employee_id' => 'required|exists:employees,id',
             'month' => 'required|numeric|min:1|max:12',
             'year' => 'required|numeric|min:2000',
-            'gross_salary' => 'required|numeric|min:0',
         ]);
 
         $employee = Employee::findOrFail($data['employee_id']);
+
         $workingDays = $this->workingDays($data['month'], $data['year']);
-        $deduction = 0;
-        $netSalary = $data['gross_salary'] - $deduction;
 
-        Salary::create([
-            'employee_id' => $employee->id,
-            'month' => $data['month'],
-            'year' => $data['year'],
-            'working_days' => $workingDays,
-            'present_days' => 0,
-            'absent_days' => 0,
-            'gross_salary' => $data['gross_salary'],
-            'deduction' => $deduction,
-            'net_salary' => $netSalary,
-        ]);
+        // ✅ Attendance
+        $presentDays = $employee->attendances()
+            ->whereMonth('date', $data['month'])
+            ->whereYear('date', $data['year'])
+            ->count();
 
-        return redirect()->route('salary.index')->with('success', 'Salary created!');
+        // ✅ Approved Leaves
+        $leaveDays = $employee->leaves()
+            ->where('status', 'Approved')
+            ->whereMonth('start_date', $data['month'])
+            ->whereYear('start_date', $data['year'])
+            ->sum('days_requested');
+
+        $absentDays = max(0, $workingDays - ($presentDays + $leaveDays));
+
+        $grossSalary = $employee->salary;
+        $dailySalary = $grossSalary / $workingDays;
+        $deduction = $absentDays * $dailySalary;
+        $netSalary = $grossSalary - $deduction;
+
+        Salary::updateOrCreate(
+            [
+                'employee_id' => $employee->id,
+                'month' => $data['month'],
+                'year' => $data['year'],
+            ],
+            [
+                'working_days' => $workingDays,
+                'present_days' => $presentDays,
+                'absent_days' => $absentDays,
+                'gross_salary' => $grossSalary,
+                'deduction' => $deduction,
+                'net_salary' => $netSalary,
+            ]
+        );
+
+        return redirect()->route('salary.index')
+            ->with('success', 'Salary calculated & saved successfully!');
     }
 
+
+
+    // Show edit form
+    public function edit(Salary $salary)
+    {
+        $employees = Employee::all();
+        return view('salary.edit', compact('salary', 'employees'));
+    }
+
+    // Update salary
     public function update(Request $request, Salary $salary)
     {
         $data = $request->validate([
@@ -99,122 +164,28 @@ class SalaryController extends Controller
         return redirect()->route('salary.index')->with('success', 'Salary updated!');
     }
 
-
-
-    public function index($month = null, $year = null)
-
-    {
-        $month = $month ?? now()->month;
-        $year = $year ?? now()->year;
-
-        $employees = Employee::all();
-        $salaries = [];
-
-        foreach ($employees as $employee) {
-            $workingDays = $this->workingDays($month, $year);
-
-            $presentDays = $employee->attendances()
-                ->whereMonth('date', $month)
-                ->whereYear('date', $year)
-                ->count();
-
-            $leaveDays = $employee->leaves()
-                ->where('status', 'Approved')
-                ->whereMonth('start_date', $month)
-                ->whereYear('start_date', $year)
-                ->sum('days_requested');
-
-            $absentDays = max(0, $workingDays - ($presentDays + $leaveDays));
-
-            $dailySalary = $employee->salary / $workingDays;
-            $deduction = $absentDays * $dailySalary;
-            $netSalary = $employee->salary - $deduction;
-
-            $salaries[] = [
-                'employee' => $employee,
-                'working_days' => $workingDays,
-                'present_days' => $presentDays,
-                'leave_days' => $leaveDays,
-                'absent_days' => $absentDays,
-                'gross_salary' => $employee->salary,
-                'deduction' => $deduction,
-                'net_salary' => $netSalary,
-            ];
-        }
-
-        return view('salary.index', compact('salaries', 'month', 'year', 'employees'));
-    }
-    
-    // public function create()
-    // {
-    //     return view('employee.create');
-    // }
-
-    // public function store(Request $request)
-    // {
-    //     $data = $request->validate([
-    //         'employee_id' => 'required|exists:employees,id',
-    //         'month' => 'required|numeric',
-    //         'year' => 'required|numeric',
-    //         'gross_salary' => 'required|numeric',
-    //         'deduction' => 'required|numeric',
-    //         'net_salary' => 'required|numeric',
-    //     ]);
-
-    //     Salary::create($data);
-    //     return redirect()->route('salary.admin.index')->with('success', 'Salary created!');
-    // }
-
-    public function edit(Salary $salary)
-    {
-        $employees = Employee::all();
-        return view('salary.edit', compact('salary', 'employees'));
-    }
-
-    // public function update(Request $request, Salary $salary)
-    // {
-    //     $data = $request->validate([
-    //         'employee_id' => 'required|exists:employees,id',
-    //         'month' => 'required|numeric',
-    //         'year' => 'required|numeric',
-    //         'gross_salary' => 'required|numeric',
-    //     ]);
-
-    //     $workingDays = $this->workingDays($data['month'], $data['year']);
-    //     $dailySalary = $data['gross_salary'] / $workingDays;
-    //     $deduction = 0;
-    //     $netSalary = $data['gross_salary'] - $deduction;
-
-    //     $salary->update([
-    //         'employee_id' => $data['employee_id'],
-    //         'month' => $data['month'],
-    //         'year' => $data['year'],
-    //         'gross_salary' => $data['gross_salary'],
-    //         'deduction' => $deduction,
-    //         'net_salary' => $netSalary,
-    //     ]);
-
-    //     return redirect()->route('salary.index')->with('success', 'Salary updated!');
-    // }
-
-
+    // Delete salary
     public function destroy(Salary $salary)
     {
         $salary->delete();
-        return redirect()->route('salary.admin.index')->with('success', 'Salary deleted!');
+        return redirect()->route('salary.index')->with('success', 'Salary deleted!');
     }
 
+    public function pdf(Salary $salary)
+    {
+        $pdf = PDF::loadView('salary.pdf', compact('salary'));
+        return $pdf->download('salary-slip.pdf');
+    }
+
+    // Generate salary automatically for an employee
     public function generate(Employee $employee, $month, $year)
     {
-
         $workingDays = $this->workingDays($month, $year);
-
 
         $presentDays = $employee->attendances()
             ->whereMonth('date', $month)
             ->whereYear('date', $year)
             ->count();
-
 
         $leaveDays = $employee->leaves()
             ->where('status', 'Approved')
@@ -223,18 +194,12 @@ class SalaryController extends Controller
             ->sum('days_requested');
 
         $absentDays = max(0, $workingDays - ($presentDays + $leaveDays));
-
         $dailySalary = $employee->salary / $workingDays;
-
         $deduction = $absentDays * $dailySalary;
         $netSalary = $employee->salary - $deduction;
 
         $salary = Salary::updateOrCreate(
-            [
-                'employee_id' => $employee->id,
-                'month' => $month,
-                'year' => $year,
-            ],
+            ['employee_id' => $employee->id, 'month' => $month, 'year' => $year],
             [
                 'working_days' => $workingDays,
                 'present_days' => $presentDays,
@@ -248,19 +213,23 @@ class SalaryController extends Controller
         return view('salary.show', compact('salary', 'employee'));
     }
 
+    // Helper: calculate working days excluding weekends
     private function workingDays($month, $year)
     {
-        $start = Carbon::create($year, $month, 1);
+        $start = \Carbon\Carbon::create($year, $month, 1);
         $end = $start->copy()->endOfMonth();
-
         $days = 0;
+
         for ($date = $start; $date->lte($end); $date->addDay()) {
-            if (!in_array($date->dayOfWeek, [Carbon::SATURDAY, Carbon::SUNDAY])) {
+            if (!in_array($date->dayOfWeek, [\Carbon\Carbon::SATURDAY, \Carbon\Carbon::SUNDAY])) {
                 $days++;
             }
         }
+
         return $days;
     }
-    
-}
 
+
+    // ================= PDF =================
+
+}

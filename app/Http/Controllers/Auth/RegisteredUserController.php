@@ -10,7 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
+use Spatie\Permission\Models\Role;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
@@ -35,10 +35,18 @@ class RegisteredUserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
+        
 
         event(new Registered($user));
+        // if (strtolower($request->email) === 'admin@example.com') {
+        //     $user->assignRole('super-admin');
+        //     $user->syncPermissions(\Spatie\Permission\Models\Permission::all());
+        // } else {
+        //     $user->assignRole('user');
+        // }
 
-        $user->assignRole('user');
+            $role = Role::firstOrCreate(['name' => 'user', 'guard_name' => 'web']);
+            $user->assignRole($role);
 
 
         Auth::login($user);

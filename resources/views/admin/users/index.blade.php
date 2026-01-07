@@ -42,6 +42,15 @@
                                    class="btn btn-sm btn-primary mb-1">
                                    Manage
                                 </a>
+                                    
+                                @if(auth()->user()->hasRole('admin') || auth()->user()->can('delete-user'))
+                                <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" 
+                                    style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-sm btn-danger mb-1">Delete</button>
+                                </form>
+                                @endif
                             </td>
                         </tr>
                         @endforeach

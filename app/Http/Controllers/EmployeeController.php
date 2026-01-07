@@ -26,15 +26,15 @@ class EmployeeController extends Controller
     {
         $data = $request->validated();
 
-        $user = User::create([
-            'name' => $data['first_name'].' '.$data['last_name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
-        ]);
+        // $user = User::create([
+        //     'name' => $data['first_name'].' '.$data['last_name'],
+        //     'email' => $data['email'],
+        //     'password' => Hash::make($data['password']),
+        // ]);
 
-        $user->employee('Employee');
+        // $user->employee('Employee');
 
-        $data['user_id'] = $user->id;
+        // $data['user_id'] = $user->id;
         $data['password'] = Hash::make($data['password']);
 
         Employee::create($data);
