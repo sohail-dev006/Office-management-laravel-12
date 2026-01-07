@@ -20,7 +20,9 @@
                             <th>Days</th>
                             <th>Reason</th>
                             <th>Status</th>
-                            <th>Action</th>
+                            @canany(['edit-employee', 'delete-employee'])
+                                <th>Actions</th>
+                            @endcanany
                         </tr>
                     </thead>
 
@@ -47,20 +49,22 @@
                                 </span>
                             </td>
                             <td>
-                                <a href="{{ route('leaves.edit', $leave->id) }}"
-                                class="btn btn-sm btn-secondary">Edit</a>
-            
+                                @can('edit-employee')
+                                    <a href="{{ route('leaves.edit', $leave) }}"
+                                    class="btn btn-sm btn-secondary">Edit</a>
+                                @endcan
 
-                                <form action="{{ route('leaves.destroy', $leave->id) }}"
-                                    method="POST" style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-sm btn-danger"
-                                            onclick="return confirm('Are you sure?')">
-                                        Delete
-                                    </button>
-                                </form>
-
+                                @can('delete-employee')
+                                    <form action="{{ route('leaves.destroy', $leave) }}"
+                                        method="POST" style="display:inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-sm btn-danger"
+                                                onclick="return confirm('Are you sure?')">
+                                            Delete
+                                        </button>
+                                    </form>
+                                @endcan
                             </td>
                         </tr>
                     @endforeach

@@ -6,6 +6,8 @@ namespace App\Http\Controllers;
 use App\Models\Employee;
 use Carbon\Carbon;
 
+// not using
+
 class LeaveSummaryController extends Controller
 {
     public function show(Employee $employee)

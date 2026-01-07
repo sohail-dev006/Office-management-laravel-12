@@ -28,12 +28,17 @@ class StoreEmployeeRequest extends FormRequest
             'first_name' => ['required', 'string', 'max:255'],
             'last_name'  => ['required', 'string', 'max:255'],
             'designation'       => ['required', 'string', 'max:255'],
-            'email'      => [
-                'required',
-                'email',
-                'max:255',
-                Rule::unique('employees')->ignore($employeeId),
-            ],
+            'email' => [
+            'required',
+            'email',
+            'max:255',
+            Rule::unique('users', 'email'),],
+            // 'email'      => [
+            //     'required',
+            //     'email',
+            //     'max:255',
+            //     Rule::unique('employees')->ignore($employeeId),
+            // ],
             'password'   => [$employeeId ? 'nullable' : 'required', 'string', 'min:8',],
             'phone'      => ['required', 'string', 'max:20'],
             'address'    => ['required', 'string', 'max:255'],

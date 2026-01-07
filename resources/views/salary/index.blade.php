@@ -8,7 +8,7 @@
                     <h2 class="text-white">Salary Table - {{ \Carbon\Carbon::create($year, $month, 1)->format('F Y') }}</h2>
                 </div>
                 <div>
-                    <a href="{{ route('salary.create') }}" class="btn btn-success">Add Salary</a>
+                    <!-- <a href="{{ route('salary.create') }}" class="btn btn-success">Add Salary</a> -->
                     <a href="{{ route('employee.index') }}" class="btn btn-secondary">Back</a>
                 </div>
             </div>
@@ -23,7 +23,7 @@
                         <th>Gross Salary</th>
                         <th>Deduction</th>
                         <th>Net Salary</th>
-                        <th>Action</th>
+                        <!-- <th>Action</th> -->
                     </tr>
                 </thead>
                 <tbody>
@@ -37,18 +37,23 @@
                             <td>{{ number_format($s['gross_salary'], 2) }}</td>
                             <td>{{ number_format($s['deduction'], 2) }}</td>
                             <td>{{ number_format($s['net_salary'], 2) }}</td>
-                            <td>
-                                <a class="rounded text-white" href="{{ route('salary.edit', $s['employee']->id) }}">
-                                    <button class="px-1 rounded btn-secondary">Edit</button>
-                                </a>
-                                <form action="{{ route('salary.destroy', $s['employee']->id) }}" method="POST" style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="px-1 rounded btn-danger" onclick="return confirm('Are you sure you want to delete this salary?')">
-                                        Delete
-                                    </button>
-                                </form>
-                            </td>
+                            <!-- <td>
+                                
+                                    <a class="rounded text-white" href="{{ route('salary.edit', $s['employee']->id) }}">
+                                        <button class="px-1 rounded btn-secondary">Edit</button>
+                                    </a>
+
+                                    <form action="{{ route('salary.destroy', $s['employee']->id) }}" method="POST" style="display:inline;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="px-1 rounded btn-danger"
+                                            onclick="return confirm('Are you sure you want to delete this salary?')">
+                                            Delete
+                                        </button>
+                                    </form>
+                                
+                            </td> -->
+
                         </tr>
                     @empty
                         <tr>

@@ -2,7 +2,7 @@
 <div class="container mt-2">
     <h3 class="text-white fs-1 my-2">Edit Leave</h3>
 
-    <form class="bg-secondary rounded" action="{{ route('leaves.update', $leave->id) }}" method="POST">
+    <form class="bg-secondary rounded" action="{{ route('leaves.update', $leave) }}" method="POST">
         @csrf
         @method('PUT')
 

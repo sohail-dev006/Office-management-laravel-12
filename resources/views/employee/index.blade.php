@@ -18,7 +18,6 @@
                             <th>Name</th>
                             <th>Email</th>
                             <th>Designation</th>
-                            <!-- <th>Phone</th> -->
                             <th>Address</th>
                             <th>Gender</th>
                             <th>DOB</th>
@@ -28,7 +27,10 @@
                             <th>Salary</th>
                             <th>Age</th>
                             <th>Status</th>
-                            <th>Actions</th>
+                            @canany(['edit-employee', 'delete-employee'])
+                                <th>Actions</th>
+                            @endcanany
+
                         </tr>
                     </thead>
                     <tbody class="text-white">
@@ -38,7 +40,6 @@
                             <td>{{ $emp->first_name }} {{ $emp->last_name }}</td>
                             <td>{{ $emp->email }}</td>
                             <td>{{ $emp->designation }}</td>
-                            <!-- <td>{{ $emp->phone }}</td> -->
                             <td>{{ $emp->address }}</td>
                             <td>{{ ucfirst($emp->gender) }}</td>
                             <td>{{ $emp->dob }}</td>
@@ -53,12 +54,19 @@
                                 </span>
                             </td>
                             <td>
+                                {{-- Edit Button --}}
+                                @can('edit-employee')
                                 <a href="{{ route('employee.edit', $emp->id) }}" class="btn btn-sm btn-warning mb-1">Edit</a>
+                                @endcan
+
+                                {{-- Delete Button --}}
+                                @can('delete-employee')
                                 <form action="{{ route('employee.destroy', $emp->id) }}" method="POST" class="d-inline">
                                     @csrf
                                     @method('DELETE')
                                     <button class="btn btn-sm btn-danger mb-1" onclick="return confirm('Delete this employee?')">Delete</button>
                                 </form>
+                                @endcan
                             </td>
                         </tr>
                         @endforeach

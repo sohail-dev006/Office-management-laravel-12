@@ -40,6 +40,13 @@
                             Salary
                         </a>
                     </li>
+                    <li class="nav-item">
+                        @role('admin')
+                        <a href="{{ route('admin.users') }}" class="nav-link text-white {{ request()->routeIs('admin.users.*') ? 'active-link' : '' }}">
+                            Users
+                        </a>
+                        @endrole
+                    </li>
                 </ul>
             </div>
 

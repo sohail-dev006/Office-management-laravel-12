@@ -6,11 +6,25 @@ use App\Models\Employee;
 use App\Models\Salary;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use GuzzleHttp\Middleware;
 
 
 
 class SalaryController extends Controller
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('role:admin', only: [
+                'create',
+                'store',
+                'edit',
+                'update',
+                'destroy'
+            ]),
+        ];
+    }
+
     // public function index($month = null, $year = null)
     // {
     //     $month = $month ?? now()->month;
@@ -44,7 +58,7 @@ class SalaryController extends Controller
 
         $employee = Employee::findOrFail($data['employee_id']);
         $workingDays = $this->workingDays($data['month'], $data['year']);
-        $deduction = 0; // For simplicity, or calculate absences if needed
+        $deduction = 0;
         $netSalary = $data['gross_salary'] - $deduction;
 
         Salary::create([
@@ -130,6 +144,7 @@ class SalaryController extends Controller
 
         return view('salary.index', compact('salaries', 'month', 'year', 'employees'));
     }
+    
     // public function create()
     // {
     //     return view('employee.create');
