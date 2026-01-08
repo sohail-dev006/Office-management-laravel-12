@@ -14,12 +14,27 @@ class LeaveController extends Controller
 {
     public function index()
     {
-        $leaves = Leave::with('employee')
-            ->orderBy('start_date', 'desc')
-            ->get();
+        $user = auth()->user();
+
+        if ($user->hasRole('admin')) {
+            // Admin sees all leaves
+            $leaves = Leave::with('employee')
+                ->orderBy('start_date', 'desc') // use correct column
+                ->get();
+        } else {
+            // Normal employee sees only their own leaves
+            $leaves = Leave::with('employee')
+                ->whereHas('employee', function ($query) use ($user) {
+                    $query->where('user_id', $user->id);
+                })
+                ->orderBy('start_date', 'desc') // use correct column
+                ->get();
+        }
 
         return view('leaves.index', compact('leaves'));
     }
+
+
 
     public function create()
     {

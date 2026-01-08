@@ -105,7 +105,7 @@
 
     <div class="row">
         <span class="label">Employee ID:</span>
-        <span class="value">{{ $salary->employee->id }}</span>
+        <span class="value">000{{ $salary->employee->id }}</span>
     </div>
 
     <div class="row">
@@ -118,6 +118,23 @@
         <tr>
             <th>Description</th>
             <th>Amount</th>
+        </tr>
+
+        <tr>
+            <td>Leaves Days</td>
+            <td>{{ $salary->leaves }}</td>
+        </tr>
+        <tr>
+            <td>Present Days</td>
+            <td>{{ $salary->present_days }}</td>
+        </tr>
+        <tr>
+            <td>Working Days</td>
+            <td>{{ $salary->working_days }}</td>
+        </tr>
+        <tr>
+            <td>Absent</td>
+            <td>{{ $salary->absent_days }}</td>
         </tr>
 
         <tr>
@@ -137,10 +154,10 @@
     </table>
 
     <!-- FOOTER -->
-    <div class="footer">
+    <!-- <div class="footer">
         This is a computer generated salary slip.  
         No signature is required.
-    </div>
+    </div> -->
 
 </div>
 

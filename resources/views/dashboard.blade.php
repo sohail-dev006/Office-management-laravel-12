@@ -17,9 +17,11 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        @can('add-attendance')
                         <a href="{{ route('attendance.index') }}" class="nav-link text-white">
                             Attendance
                         </a>
+                        @endcan
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('leaves.index') }}" class="nav-link text-white">

@@ -6,9 +6,11 @@
 
         <div class="col-md-9 col-lg-10 pt-2">
 
+        @can('add-employee')
             <a href="{{ route('employee.create') }}" class="btn btn-primary mb-3">
                  Add Employee
             </a>
+        @endcan
 
             <div class="table-responsive">
                 <table class="table table-bordered table-striped text-white">

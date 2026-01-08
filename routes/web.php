@@ -20,18 +20,60 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        Route::middleware('auth')->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'redirect'])
+            ->name('dashboard');
+    });
 
     // Salary routes
+    // Route::get('/salary', [SalaryController::class,'index'])->name('salary.index');
+    // Route::post('/salary/generate', [SalaryController::class,'generate'])->name('salary.generate');
+    // Route::get('/salary/{salary}/pdf', [SalaryController::class,'pdf'])->name('salary.pdf');
+    // Route::delete('/salary/{salary}', [SalaryController::class,'destroy'])->name('salary.destroy');
+});
+Route::middleware(['auth','permission:salary-list'])->group(function () {
     Route::get('/salary', [SalaryController::class,'index'])->name('salary.index');
     Route::post('/salary/generate', [SalaryController::class,'generate'])->name('salary.generate');
     Route::get('/salary/{salary}/pdf', [SalaryController::class,'pdf'])->name('salary.pdf');
     Route::delete('/salary/{salary}', [SalaryController::class,'destroy'])->name('salary.destroy');
 });
 
-// Resource routes with permissions
-Route::middleware(['auth','permission:add-employee'])->resource('employee', EmployeeController::class);
-Route::middleware(['auth','permission:add-attendence'])->resource('attendance', AttendanceController::class);
+
+//  routes with permissions
+Route::middleware('auth')->group(function () {
+    // Employee list
+    Route::get('/employees', [EmployeeController::class, 'index'])->name('employee.index');
+
+
+    // Add employee
+    Route::get('/employees/create', [EmployeeController::class, 'create'])
+        ->middleware('permission:add-employee')
+        ->name('employee.create');
+
+    Route::post('/employees', [EmployeeController::class, 'store'])
+        ->middleware('permission:add-employee')
+        ->name('employee.store');
+
+    // Edit employee
+    Route::get('/employees/{employee}/edit', [EmployeeController::class, 'edit'])
+        ->middleware('permission:edit-employee')
+        ->name('employee.edit');
+
+    Route::patch('/employees/{employee}', [EmployeeController::class, 'update'])
+        ->middleware('permission:edit-employee')
+        ->name('employee.update');
+
+    // Delete employee
+    Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy'])
+        ->middleware('permission:delete-employee')
+        ->name('employee.destroy');
+});
+
+
+Route::middleware(['auth','permission:attendance-list|add-attendance'])
+    ->resource('attendance', AttendanceController::class);
 Route::middleware(['auth','permission:add-leave'])->resource('leaves', LeaveController::class)
     ->parameters(['leaves' => 'leave']);
 Route::middleware(['auth','permission:add-salary'])->resource('salary', SalaryController::class);

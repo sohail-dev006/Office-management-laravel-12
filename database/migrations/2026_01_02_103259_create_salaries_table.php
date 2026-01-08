@@ -18,6 +18,7 @@ return new class extends Migration
             $table->integer('year');
             $table->integer('working_days');
             $table->integer('present_days');
+            $table->integer('leaves')->default(0);
             $table->integer('absent_days');
             $table->decimal('gross_salary', 10, 2);
             $table->decimal('deduction', 10, 2)->default(0);

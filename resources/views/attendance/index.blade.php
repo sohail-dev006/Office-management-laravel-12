@@ -7,7 +7,7 @@
             <!-- Main Content -->
             <div class="col-md-9 col-lg-10 p-4">
                 <div class="d-flex text-white justify-content-between mb-3">
-                    <h4>Attendance</h4>
+                    <h4 class="fs-4">Attendance</h4>
                     <a href="{{ route('attendance.create') }}" class="btn btn-primary">Add Attendance</a>
                 </div>
 

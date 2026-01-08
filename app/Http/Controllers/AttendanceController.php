@@ -7,16 +7,31 @@ use App\Models\Employee;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
+
 class AttendanceController extends Controller
 {
     public function index()
     {
-        $attendances = Attendance::with('employee')
-            ->orderBy('date', 'desc')
-            ->get();
+        $user = auth()->user();
+
+        if ($user->hasRole('admin')) {
+           
+            $attendances = Attendance::with('employee')
+                ->orderBy('date', 'desc')
+                ->get();
+        } else {
+        
+            $attendances = Attendance::with('employee')
+                ->whereHas('employee', function ($query) use ($user) {
+                    $query->where('user_id', $user->id);
+                })
+                ->orderBy('date', 'desc')
+                ->get();
+        }
 
         return view('attendance.index', compact('attendances'));
     }
+
 
     public function create()
     {
@@ -115,7 +130,5 @@ class AttendanceController extends Controller
 
         return back()->with('success', 'Check-in recorded on time!');
     }
-
-
 
 }

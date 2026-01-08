@@ -41,10 +41,14 @@ class UserPermissionController extends Controller
 
         $roleName = $request->role;
 
-        if (strtolower($roleName) === 'super-admin') {
+        if (strtolower($roleName) === 'admin') {
+
+
             // Super Admin gets all permissions automatically
-            $role = Role::firstOrCreate(['name' => 'super-admin']);
+            $role = Role::firstOrCreate(['name' => 'admin']);
             $user->syncRoles([$role->name]);
+
+            
             $user->syncPermissions(Permission::all()); // assign all permissions
         } else {
             // Create or get the role typed by admin

@@ -16,6 +16,7 @@ class Salary extends Model
         'gross_salary',
         'deduction',
         'net_salary',
+        'leaves'
     ];
 
     public function employee()

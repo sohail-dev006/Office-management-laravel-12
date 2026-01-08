@@ -38,14 +38,14 @@
                                     </li>
                                 @else
                                     <li class="nav-item">
-                                        <a href="{{ route('login') }}" class="inline-block text-black px-3 bg-secondary rounded mx-2 py-2">
+                                        <a href="{{ route('login') }}" class="inline-block text-white px-3 bg-secondary rounded mx-2 py-2">
                                             Log in
                                         </a>
                                     </li>
 
                                     @if (Route::has('register'))
                                         <li class="nav-item">
-                                            <a href="{{ route('register') }}" class="inline-block text-black px-3 bg-secondary rounded mx-2 py-2">
+                                            <a href="{{ route('register') }}" class="inline-block text-white px-3 bg-secondary rounded mx-2 py-2">
                                                 Register
                                             </a>
                                         </li>

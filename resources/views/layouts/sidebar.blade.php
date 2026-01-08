@@ -15,7 +15,7 @@
             @endcan
         </li>
         <li class="nav-item">
-            @can('add-attendence')
+            @can('add-attendance')
             <a href="{{ route('attendance.index') }}" class="nav-link text-white {{ request()->routeIs('attendance.*') ? 'active-link' : '' }}">
                 Attendance
             </a>
@@ -43,6 +43,7 @@
             </a>
             @endrole
         </li>
+
     </ul>
 </div>
 

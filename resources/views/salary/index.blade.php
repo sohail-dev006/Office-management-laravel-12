@@ -7,7 +7,7 @@
 
             <!-- HEADER -->
             <div class="d-flex pt-2 align-items-center justify-content-between">
-                <h2 class="text-white">
+                <h2 class="text-white fs-4">
                     Salary Table - {{ \Carbon\Carbon::create($year, $month, 1)->format('F Y') }}
                 </h2>
 

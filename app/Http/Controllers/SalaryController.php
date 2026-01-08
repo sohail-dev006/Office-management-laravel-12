@@ -19,24 +19,30 @@ class SalaryController extends Controller
     //     $this->middleware('auth');
     // }
 
-    public function index(Request $request)
-    {
-        $month = $request->month ?? now()->month;
-        $year  = $request->year ?? now()->year;
+public function index(Request $request)
+{
+    $month = $request->month ?? now()->month;
+    $year  = $request->year ?? now()->year;
 
-        $query = Salary::with('employee')
-            ->where('month', $month)
-            ->where('year', $year);
-            
+    $user = auth()->user();
 
-        // if (!auth()->user()->hasRole('admin')) {
-        //     $query->where('employee_id', auth()->user()->employee?->id);
-        // }
+    $query = Salary::with('employee')
+        ->where('month', $month)
+        ->where('year', $year);
 
-        $salaries = $query->get();
-
-        return view('salary.index', compact('salaries','month','year'));
+    // Only restrict non-admins without 'salary-list' permission
+    if (!$user->hasRole('admin') && !$user->can('salary-list')) {
+        $query->whereHas('employee', function($q) use ($user) {
+            $q->where('user_id', $user->id);
+        });
     }
+
+    $salaries = $query->get();
+
+    return view('salary.index', compact('salaries','month','year'));
+}
+
+
 
 
 
@@ -91,13 +97,13 @@ class SalaryController extends Controller
 
         $workingDays = $this->workingDays($data['month'], $data['year']);
 
-        // ✅ Attendance
+        // Attendance
         $presentDays = $employee->attendances()
             ->whereMonth('date', $data['month'])
             ->whereYear('date', $data['year'])
             ->count();
 
-        // ✅ Approved Leaves
+        // Approved Leaves
         $leaveDays = $employee->leaves()
             ->where('status', 'Approved')
             ->whereMonth('start_date', $data['month'])
@@ -124,6 +130,7 @@ class SalaryController extends Controller
                 'gross_salary' => $grossSalary,
                 'deduction' => $deduction,
                 'net_salary' => $netSalary,
+                'leaves' => $leaveDays,
             ]
         );
 
@@ -207,6 +214,7 @@ class SalaryController extends Controller
                 'gross_salary' => $employee->salary,
                 'deduction' => $deduction,
                 'net_salary' => $netSalary,
+                'leaves' => $leaveDays
             ]
         );
 
@@ -228,8 +236,5 @@ class SalaryController extends Controller
 
         return $days;
     }
-
-
-    // ================= PDF =================
 
 }

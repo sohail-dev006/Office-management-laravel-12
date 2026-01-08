@@ -5,7 +5,7 @@
 
         <div class="col-md-9 col-lg-10 p-4">
             <div class="d-flex justify-content-between text-white mb-3">
-                <h4>Leave Requests</h4>
+                <h4 class="fs-4">Leave Requests</h4>
                 <a href="{{ route('leaves.create') }}" class="btn btn-primary">Apply Leave</a>
             </div>
 

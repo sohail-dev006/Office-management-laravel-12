@@ -12,6 +12,7 @@ class PermissionSeeder extends Seeder
     {
         $permissions = [
             ['module'=>'Dashboard','name'=>'view-dashboard','guard_name'=>'web'],
+            ['module'=>'Dashboard','name'=>'dashboard','guard_name'=>'web'],
 
             ['module'=>'Employee','name'=>'add-employee','guard_name'=>'web'],
             ['module'=>'Employee','name'=>'employee-list','guard_name'=>'web'],
@@ -40,6 +41,6 @@ class PermissionSeeder extends Seeder
         }
 
         Role::findByName('admin')->syncPermissions(Permission::all());
-        Role::findByName('user')->syncPermissions(['view-dashboard']);
+        Role::findByName('user')->syncPermissions(['dashboard']);
     }
 }

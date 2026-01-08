@@ -1,13 +1,13 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Employee;
-use App\Models\Department;
 use App\Models\Attendance;
 use App\Models\Leave;
 use App\Models\Salary;
 use Carbon\Carbon;
+
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -27,4 +27,25 @@ class DashboardController extends Controller
                 ->count(),
         ]);
     }
+
+    public function UserDash()
+    {
+        $user = Auth::user(); 
+        return view('UserDashboard', compact('user'));
+    }
+
+    public function redirect()
+    {
+        $user = Auth::user();
+
+        if ($user->getAllPermissions()->isEmpty()) {
+            return $this->UserDash(); 
+        }
+
+
+        return $this->index();
+    }
+
 }
+
+

@@ -9,18 +9,23 @@
             <h2 class="my-2 pb-2 fs-2 text-white">Users & Permissions</h2>
 
             {{-- Tabs --}}
-            <ul class="nav nav-tabs mb-3" id="userTabs" role="tablist">
+            <ul class="nav d-flex justify-content-between nav-tabs mb-3" id="userTabs" role="tablist">
                 <!-- <li class="nav-item" role="presentation">
                     <button class="nav-link" id="existing-tab" data-bs-toggle="tab" 
                             data-bs-target="#existing" type="button" role="tab">
                         Existing Users
                     </button>
                 </li> -->
-                <li class="nav-item" role="presentation">
+                <li class="nav-item">
                     <button class="nav-link active" id="create-tab" data-bs-toggle="tab" 
                             data-bs-target="#create" type="button" role="tab">
                         Create New Roles
                     </button>
+                </li>
+                <li class="nav-item mx-2">
+                    <a  href="{{ route('admin.users') }}" class="bg-info px-2 py-1 fs-5 rounded">
+                        Back
+                    </a>
                 </li>
             </ul>
 

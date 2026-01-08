@@ -11,8 +11,6 @@ class AdminSeeder extends Seeder
 {
     public function run()
     {
-        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-        $userRole  = Role::firstOrCreate(['name' => 'user', 'guard_name' => 'web']);
 
         $admin = User::firstOrCreate(
             ['email' => 'admin@gmail.com'],
@@ -23,6 +21,7 @@ class AdminSeeder extends Seeder
         );
 
         $admin->assignRole('admin');
+
     }
 }
 

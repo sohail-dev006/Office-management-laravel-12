@@ -8,14 +8,37 @@ use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class EmployeeController extends Controller
 {
     public function index()
     {
-        $employees = Employee::all();
+        $user = Auth::user();
+
+        if ($user->hasRole('admin')) {
+            $employees = Employee::all();
+        } else {
+            $employees = Employee::where('user_id', $user->id)->get();
+        }
+
         return view('employee.index', compact('employees'));
     }
+
+    // public function index()
+    // {
+
+    //     if (auth()->user()->can('employee-list')) {
+    //         $employees = Employee::all();          
+    //     } 
+
+    //     else {
+    //         $employees = Employee::where('user_id', auth()->id())->get();
+    //     }
+
+    //     return view('employee.index', compact('employees'));
+    // }
+
 
     public function create()
     {
