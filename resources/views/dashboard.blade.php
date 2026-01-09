@@ -52,8 +52,8 @@
                 </ul>
             </div>
 
-            <div class="col-md-9 col-lg-10 p-4">
-            <h3 class="mb-4 fs-2 text-white">Dashboard</h3>
+        <div class="col-md-9 col-lg-10 p-4">
+        <h3 class="mb-4 fs-2 text-white">Admin Dashboard</h3>
 
             <div class="row">
                 <div class="col-md-3">

@@ -113,9 +113,9 @@
                                     </p>
                                 </div>
                                 <div class="">
-                                    <p>PKR {{ number_format($salary->gross, 2) }}</p>
+                                    <p>PKR {{ number_format($salary->gross_salary, 2) }}</p>
                                     <p>PKR {{ number_format($salary->deduction, 2) }}</p>
-                                    <p>PKR {{ number_format($salary->net, 2) }}</p>
+                                    <p>PKR {{ number_format($salary->net_salary, 2) }}</p>
                                 </div>
                             </div>
                             @else
