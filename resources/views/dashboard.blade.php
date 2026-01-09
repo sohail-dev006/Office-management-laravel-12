@@ -52,53 +52,47 @@
                 </ul>
             </div>
 
-            <!-- Main Content -->
-            <div class="col-md-9 col-lg-10 bg-light p-4">
-                <h3 class="mb-4 fs-2">Dashboard</h3>
+            <div class="col-md-9 col-lg-10 p-4">
+            <h3 class="mb-4 fs-2 text-white">Dashboard</h3>
 
-                <div class="row">
-                    <!-- Employees -->
-                    <div class="col-md-3">
-                        <div class="card text-white bg-secondary mb-3">
-                            <div class="card-body">
-                                <h5>Total Employees</h5>
-                                <h2 class="fs-3">{{ $totalEmployees }}</h2>
-                            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card text-white bg-secondary mb-3">
+                        <div class="card-body">
+                            <h5 class="text-center fs-4">Total Employees</h5>
+                            <h2 class="text-center pt-3 fs-2">{{ $totalEmployees }}</h2>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Present -->
-                    <div class="col-md-3">
-                        <div class="card text-white bg-secondary mb-3">
-                            <div class="card-body">
-                                <h5>Present Today</h5>
-                                <h2 class="fs-3">{{ $presentToday }}</h2>
-                            </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-secondary mb-3">
+                        <div class="card-body">
+                            <h5 class="text-center fs-4">Present Today</h5>
+                            <h2 class="text-center pt-3 fs-2">{{ $presentToday }}</h2>
                         </div>
                     </div>
+                </div>
 
-                    <!-- On Leave -->
-                    <div class="col-md-3">
-                        <div class="card text-white bg-secondary mb-3">
-                            <div class="card-body">
-                                <h5>On Leave</h5>
-                                <h2 class="fs-3">{{ $onLeaveToday }}</h2>
-                            </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-secondary mb-3">
+                        <div class="card-body">
+                            <h5 class="text-center fs-4">On Leave</h5>
+                            <h2 class="text-center pt-3 fs-2">{{ $onLeaveToday }}</h2>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Salary -->
-                    <div class="col-md-3">
-                        <div class="card text-white bg-secondary mb-3">
-                            <div class="card-body">
-                                <h5>Salary Generated (This Month)</h5>
-                                <h2 class="fs-3">{{ $salaryThisMonth }}</h2>
-                            </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-secondary mb-3">
+                        <div class="card-body">
+                            <h5 class="text-center fs-4">Salary Generated</h5>
+                            <h2 class="text-center pt-3 fs-2">{{ $salaryThisMonth }}</h2>
                         </div>
                     </div>
                 </div>
             </div>
-
+        </div>
 
         </div>
     </div>
@@ -111,5 +105,8 @@
 }
 .nav-link {
     margin: 5px 0;
+}
+.card{
+    min-height: 130px;
 }
 </style>

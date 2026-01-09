@@ -30,17 +30,18 @@ class SalaryController extends Controller
         ->where('month', $month)
         ->where('year', $year);
 
-    // Filter only for non-admin & non-permission users
-    if (!$user->hasRole('admin') && !$user->can('salary-list')) {
-        $query->whereHas('employee', function($q) use ($user) {
+    // ✅ Agar admin nahi hai → sirf apni salary
+    if (!$user->hasRole('admin')) {
+        $query->whereHas('employee', function ($q) use ($user) {
             $q->where('user_id', $user->id);
         });
     }
 
     $salaries = $query->get();
 
-    return view('salary.index', compact('salaries','month','year'));
+    return view('salary.index', compact('salaries', 'month', 'year'));
 }
+
 
 
 

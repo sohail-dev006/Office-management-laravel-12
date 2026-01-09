@@ -9,7 +9,7 @@
                 <div class="card-body">
                     <form method="POST" action="{{ route('employee.update', $employee->id) }}">
                         @csrf
-                        @method('PUT')
+                        @method('PATCH')
 
                         <div class="row mb-3">
                             <div class="col-md-6">
