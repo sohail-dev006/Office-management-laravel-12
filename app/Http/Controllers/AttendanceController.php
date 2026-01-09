@@ -35,9 +35,19 @@ class AttendanceController extends Controller
 
     public function create()
     {
-        $employees = Employee::all();
+        $user = auth()->user();
+
+        if ($user->hasRole('admin')) {
+            // Admin sees all employees
+            $employees = Employee::all();
+        } else {
+            // Regular user sees only themselves
+            $employees = Employee::where('user_id', $user->id)->get();
+        }
+
         return view('attendance.create', compact('employees'));
     }
+
 
 
     public function store(Request $request)

@@ -38,9 +38,31 @@ class LeaveController extends Controller
 
     public function create()
     {
-        $employees = Employee::orderBy('first_name')->get();
+        $user = auth()->user();
+
+        if ($user->hasRole('admin')) {
+            $employees = Employee::all();
+        } else {
+            $employees = Employee::where('user_id', $user->id)->get();
+        }
+
         return view('leaves.create', compact('employees'));
     }
+
+    public function updateStatus(Request $request, Leave $leave)
+    {
+        $request->validate([
+            'status' => 'required|in:Pending,Approved,Rejected',
+        ]);
+
+        $leave->update([
+            'status' => $request->status,
+        ]);
+
+        return back()->with('success', 'Leave status updated successfully!');
+    }
+
+
 
 
     // public function store(Request $request)

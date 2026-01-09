@@ -19,7 +19,7 @@ class SalaryController extends Controller
     //     $this->middleware('auth');
     // }
 
-public function index(Request $request)
+    public function index(Request $request)
 {
     $month = $request->month ?? now()->month;
     $year  = $request->year ?? now()->year;
@@ -30,7 +30,7 @@ public function index(Request $request)
         ->where('month', $month)
         ->where('year', $year);
 
-    // Only restrict non-admins without 'salary-list' permission
+    // Filter only for non-admin & non-permission users
     if (!$user->hasRole('admin') && !$user->can('salary-list')) {
         $query->whereHas('employee', function($q) use ($user) {
             $q->where('user_id', $user->id);
@@ -46,7 +46,9 @@ public function index(Request $request)
 
 
 
-    // Show form to create salary
+
+
+    
     public function create()
     {
         $employees = Employee::orderBy('first_name')->get();
@@ -97,13 +99,13 @@ public function index(Request $request)
 
         $workingDays = $this->workingDays($data['month'], $data['year']);
 
-        // Attendance
+
         $presentDays = $employee->attendances()
             ->whereMonth('date', $data['month'])
             ->whereYear('date', $data['year'])
             ->count();
 
-        // Approved Leaves
+        
         $leaveDays = $employee->leaves()
             ->where('status', 'Approved')
             ->whereMonth('start_date', $data['month'])
@@ -140,14 +142,14 @@ public function index(Request $request)
 
 
 
-    // Show edit form
+    
     public function edit(Salary $salary)
     {
         $employees = Employee::all();
         return view('salary.edit', compact('salary', 'employees'));
     }
 
-    // Update salary
+
     public function update(Request $request, Salary $salary)
     {
         $data = $request->validate([
@@ -171,7 +173,6 @@ public function index(Request $request)
         return redirect()->route('salary.index')->with('success', 'Salary updated!');
     }
 
-    // Delete salary
     public function destroy(Salary $salary)
     {
         $salary->delete();
@@ -184,7 +185,7 @@ public function index(Request $request)
         return $pdf->download('salary-slip.pdf');
     }
 
-    // Generate salary automatically for an employee
+
     public function generate(Employee $employee, $month, $year)
     {
         $workingDays = $this->workingDays($month, $year);
@@ -221,7 +222,7 @@ public function index(Request $request)
         return view('salary.show', compact('salary', 'employee'));
     }
 
-    // Helper: calculate working days excluding weekends
+
     private function workingDays($month, $year)
     {
         $start = \Carbon\Carbon::create($year, $month, 1);

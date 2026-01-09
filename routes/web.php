@@ -78,6 +78,7 @@ Route::middleware(['auth','permission:add-leave'])->resource('leaves', LeaveCont
     ->parameters(['leaves' => 'leave']);
 Route::middleware(['auth','permission:add-salary'])->resource('salary', SalaryController::class);
 
+
 // Admin routes
 Route::middleware(['auth','role:admin'])->group(function () {
     Route::get('/admin/users', [UserPermissionController::class,'index'])->name('admin.users');
@@ -86,6 +87,11 @@ Route::middleware(['auth','role:admin'])->group(function () {
     Route::get('/admin/users/{user}/permissions', [UserPermissionController::class,'edit'])->name('admin.users.permissions');
     Route::post('/admin/users/{user}/permissions', [UserPermissionController::class,'update'])->name('admin.users.permissions.update');
     Route::delete('/admin/users/{user}', [UserPermissionController::class,'destroy'])->name('admin.users.destroy');
+
+    Route::patch('/leaves/{leave}/status', [App\Http\Controllers\LeaveController::class, 'updateStatus'])
+    ->name('leaves.updateStatus')
+    ->middleware('can:edit-employee');
+
 });
 
 require __DIR__.'/auth.php';

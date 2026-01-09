@@ -5,14 +5,14 @@
             <div class="card shadow">
 
                 @if (session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <div class="alert alert-danger alert-dismissible fade show">
                         {{ session('error') }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 @endif
 
                 @if (session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <div class="alert alert-success alert-dismissible fade show">
                         {{ session('success') }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
@@ -26,17 +26,22 @@
                     <form method="POST" action="{{ route('leaves.store') }}">
                         @csrf
 
-                        <!-- Employee Select -->
+                        <!-- Employee -->
                         <div class="mb-3">
                             <label for="employee_id" class="form-label">Employee</label>
-                            <select name="employee_id" id="employee_id" class="form-select @error('employee_id') is-invalid @enderror">
-                                <option value="">Select Employee</option>
-                                @foreach($employees as $employee)
-                                    <option value="{{ $employee->id }}">
-                                        {{ $employee->first_name }} {{ $employee->last_name }}
-                                    </option>
-                                @endforeach
-                            </select>
+                            @if(auth()->user()->hasRole('admin'))
+                                <select name="employee_id" id="employee_id" class="form-select @error('employee_id') is-invalid @enderror">
+                                    <option value="">Select Employee</option>
+                                    @foreach($employees as $employee)
+                                        <option value="{{ $employee->id }}" {{ old('employee_id') == $employee->id ? 'selected' : '' }}>
+                                            {{ $employee->first_name }} {{ $employee->last_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            @else
+                                <input type="hidden" name="employee_id" value="{{ $employees->first()->id }}">
+                                <p class="form-control">{{ $employees->first()->first_name }} {{ $employees->first()->last_name }}</p>
+                            @endif
                             @error('employee_id')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
@@ -57,26 +62,24 @@
                             @enderror
                         </div>
 
-
-
-                        <!-- Start Date -->
-                        <div class="mb-3">
-                            <label for="start_date" class="form-label">Start Date</label>
-                            <input type="date" name="start_date" id="start_date" class="form-control @error('start_date') is-invalid @enderror" value="{{ old('start_date') }}">
-                            @error('start_date') <span class="invalid-feedback">{{ $message }}</span> @enderror
-                        </div>
-
-                        <!-- End Date -->
-                        <div class="mb-3">
-                            <label for="end_date" class="form-label">End Date</label>
-                            <input type="date" name="end_date" id="end_date" class="form-control @error('end_date') is-invalid @enderror" value="{{ old('end_date') }}">
-                            @error('end_date') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                        <!-- Dates -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="start_date" class="form-label">Start Date</label>
+                                <input type="date" name="start_date" id="start_date" class="form-control @error('start_date') is-invalid @enderror" value="{{ old('start_date') }}">
+                                @error('start_date') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                            </div>
+                            <div class="col-md-6">
+                                <label for="end_date" class="form-label">End Date</label>
+                                <input type="date" name="end_date" id="end_date" class="form-control @error('end_date') is-invalid @enderror" value="{{ old('end_date') }}">
+                                @error('end_date') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                            </div>
                         </div>
 
                         <!-- Days Requested -->
                         <div class="mb-3">
                             <label for="days_requested" class="form-label">Days Requested</label>
-                            <input type="number"  name="days_requested" id="days_requested" class="form-control @error('days_requested') is-invalid @enderror" value="{{ old('days_requested') }}">
+                            <input type="number" name="days_requested" id="days_requested" class="form-control @error('days_requested') is-invalid @enderror" value="{{ old('days_requested') }}" readonly>
                             @error('days_requested') <span class="invalid-feedback">{{ $message }}</span> @enderror
                         </div>
 
@@ -96,7 +99,7 @@
         </div>
     </div>
 </div>
-</x-app-layout>
+
 <script>
     const startDate = document.getElementById('start_date');
     const endDate = document.getElementById('end_date');
@@ -112,12 +115,8 @@
                 return;
             }
 
-            // difference in milliseconds
             const diffTime = end.getTime() - start.getTime();
-
-            // convert to days (+1 because start day included)
             const diffDays = (diffTime / (1000 * 60 * 60 * 24)) + 1;
-
             daysRequested.value = diffDays;
         }
     }
@@ -125,4 +124,4 @@
     startDate.addEventListener('change', calculateDays);
     endDate.addEventListener('change', calculateDays);
 </script>
-
+</x-app-layout>

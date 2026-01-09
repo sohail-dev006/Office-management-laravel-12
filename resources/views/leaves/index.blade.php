@@ -36,33 +36,38 @@
                             <td>{{ $leave->days_requested }}</td>
                             <td>{{ $leave->reason }}</td>
                             <td>
-                                @php
-                                    $statusClass = match($leave->status) {
-                                        'Approved' => 'bg-success',
-                                        'Pending' => 'bg-warning text-dark',
-                                        'Rejected' => 'bg-danger',
-                                        default => 'bg-secondary'
-                                    };
-                                @endphp
-                                <span class="badge {{ $statusClass }}">
-                                    {{ ucfirst($leave->status) }}
-                                </span>
+                                @can('edit-employee')
+                                    <form action="{{ route('leaves.updateStatus', $leave) }}" method="POST">
+                                        @csrf
+                                        @method('PATCH')
+                                        <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                                            <option value="Pending" {{ $leave->status == 'Pending' ? 'selected' : '' }}>Pending</option>
+                                            <option value="Approved" {{ $leave->status == 'Approved' ? 'selected' : '' }}>Approved</option>
+                                            <option value="Rejected" {{ $leave->status == 'Rejected' ? 'selected' : '' }}>Rejected</option>
+                                        </select>
+                                    </form>
+                                @else
+                                    @php
+                                        $statusClass = match($leave->status) {
+                                            'Approved' => 'bg-success',
+                                            'Pending' => 'bg-warning text-dark',
+                                            'Rejected' => 'bg-danger',
+                                            default => 'bg-secondary'
+                                        };
+                                    @endphp
+                                    <span class="badge {{ $statusClass }}">{{ ucfirst($leave->status) }}</span>
+                                @endcan
                             </td>
                             <td>
                                 @can('edit-employee')
-                                    <a href="{{ route('leaves.edit', $leave) }}"
-                                    class="btn btn-sm btn-secondary">Edit</a>
+                                    <a href="{{ route('leaves.edit', $leave) }}" class="btn btn-sm btn-secondary">Edit</a>
                                 @endcan
 
                                 @can('delete-employee')
-                                    <form action="{{ route('leaves.destroy', $leave) }}"
-                                        method="POST" style="display:inline;">
+                                    <form action="{{ route('leaves.destroy', $leave) }}" method="POST" style="display:inline;">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="btn btn-sm btn-danger"
-                                                onclick="return confirm('Are you sure?')">
-                                            Delete
-                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
                                     </form>
                                 @endcan
                             </td>
