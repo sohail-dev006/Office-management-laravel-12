@@ -39,7 +39,7 @@
             @role('admin')
             <a href="{{ route('admin.users') }}"
             class="nav-link text-white {{ request()->routeIs('admin.users*') ? 'active-link' : '' }}">
-                Users
+                Users & Permissions
             </a>
             @endrole
         </li>

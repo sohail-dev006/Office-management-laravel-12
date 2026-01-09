@@ -28,7 +28,7 @@
                             Leave
                         </a>
                     </li>
-                    <!-- <li class="nav-item">
+                    {{-- <!-- <li class="nav-item">
                         <a href="{{ route('salary.generate', [
                             'employee' => auth()->user()->id, 
                             'month' => now()->month, 
@@ -36,8 +36,8 @@
                         ]) }}" class="nav-link text-white">
                             Salary g
                         </a>
-                    </li> -->
-                    <li class="nav-item">
+                    </li> --> --}}
+                    <li class="nav-item">   
                         <a href="{{ route('salary.index') }}" class="nav-link text-white">
                             Salary
                         </a>
@@ -45,7 +45,7 @@
                     <li class="nav-item">
                         @role('admin')
                         <a href="{{ route('admin.users') }}" class="nav-link text-white {{ request()->routeIs('admin.users.*') ? 'active-link' : '' }}">
-                            Users
+                            Users & Permission
                         </a>
                         @endrole
                     </li>
