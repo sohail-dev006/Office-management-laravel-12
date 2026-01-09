@@ -1,0 +1,22 @@
+[90m= [39m[34;4mApp\Models\Employee[39;24m {#6562
+    [34mid[39m: [35m3[39m,
+    [34mfirst_name[39m: "[32mSOHAIL[39m",
+    [34mlast_name[39m: "[32mAHMED[39m",
+    [34muser_id[39m: [35m5[39m,
+    [34memail[39m: "[32ms9298716@gmail.com[39m",
+    [34mdesignation[39m: "[32mDev[39m",
+    #[33mpassword[39m: "[32m$2y$12$MJpdrej1U.RbcZ5Mf4wCL.65KrojZ7EJ3Aw5yhSc5NV2KEK85Dn/a[39m",
+    [34mphone[39m: "[32m03498891325[39m",
+    [34maddress[39m: "[32mNodesol[39m",
+    [34mgender[39m: "[32mmale[39m",
+    [34mjob_type[39m: "[32mgfsd[39m",
+    [34mdob[39m: "[32m2015-01-07[39m",
+    [34mcity[39m: "[32mMingora, Swat KPK[39m",
+    [34msalary[39m: "[32m222.00[39m",
+    [34mstatus[39m: "[32mactive[39m",
+    [34mage[39m: [35m11[39m,
+    [34mjoin_date[39m: "[32m2026-01-07[39m",
+    [34mcreated_at[39m: "[32m2026-01-07 10:09:56[39m",
+    [34mupdated_at[39m: "[32m2026-01-07 10:09:56[39m",
+  }
+

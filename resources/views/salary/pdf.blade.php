@@ -8,72 +8,98 @@
         body {
             font-family: DejaVu Sans, sans-serif;
             font-size: 12px;
-            color: #333;
+            color: #2c3e50;
+            background: #fff;
         }
 
         .container {
             width: 100%;
-            padding: 20px;
-            border: 1px solid #ddd;
+            padding: 25px;
+            border: 1px solid #dcdcdc;
         }
 
+        /* Header */
         .header {
             text-align: center;
-            border-bottom: 2px solid #2c3e50;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-        }
-
-        .header h2 {
-            margin: 0;
-            color: #2c3e50;
+            border-bottom: 3px solid #0d6efd;
+            padding-bottom: 12px;
+            margin-bottom: 25px;
         }
 
         .company {
-            font-size: 14px;
+            font-size: 18px;
             font-weight: bold;
+            letter-spacing: 0.5px;
         }
 
-        .row {
+        .month {
+            font-size: 13px;
+            color: #555;
+            margin-top: 4px;
+        }
+
+        /* Section Title */
+        .section-title {
+            font-size: 13px;
+            font-weight: bold;
+            margin: 20px 0 10px;
+            color: #0d6efd;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 4px;
+        }
+
+        /* Employee Info */
+        .info-table {
             width: 100%;
-            margin-bottom: 10px;
+            border-collapse: collapse;
+        }
+
+        .info-table td {
+            padding: 6px 4px;
+            vertical-align: top;
         }
 
         .label {
-            width: 40%;
-            display: inline-block;
+            width: 25%;
             font-weight: bold;
+            color: #555;
         }
 
         .value {
-            width: 58%;
-            display: inline-block;
+            width: 25%;
         }
 
-        table {
+        /* Salary Table */
+        table.salary {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 15px;
         }
 
-        table th {
-            background: #2c3e50;
+        table.salary th {
+            background: #0d6efd;
             color: #fff;
-            padding: 8px;
+            padding: 9px;
             border: 1px solid #ddd;
+            font-size: 12px;
             text-align: left;
         }
 
-        table td {
-            padding: 8px;
+        table.salary td {
+            padding: 9px;
             border: 1px solid #ddd;
+        }
+
+        table.salary tr:nth-child(even) {
+            background: #f8f9fa;
         }
 
         .total {
             font-weight: bold;
-            background: #ecf0f1;
+            background: #eef3ff;
         }
 
+        /* Footer */
         .footer {
             margin-top: 30px;
             text-align: center;
@@ -89,75 +115,90 @@
     <!-- HEADER -->
     <div class="header">
         <div class="company">Office Management System</div>
-        <h2>Salary Slip</h2>
-        <p>
-            {{ \Carbon\Carbon::create($salary->year, $salary->month, 1)->format('F Y') }}
-        </p>
+        <div class="month">
+            Salary Slip — {{ \Carbon\Carbon::create($salary->year, $salary->month)->format('F Y') }}
+        </div>
     </div>
 
     <!-- EMPLOYEE INFO -->
-    <div class="row">
-        <span class="label">Employee Name:</span>
-        <span class="value">
-            {{ $salary->employee->first_name }} {{ $salary->employee->last_name }}
-        </span>
-    </div>
+    <div class="section-title">Employee Information</div>
 
-    <div class="row">
-        <span class="label">Employee ID:</span>
-        <span class="value">000{{ $salary->employee->id }}</span>
-    </div>
+    <table class="info-table">
+        <tr>
+            <td class="label">Employee Name</td>
+            <td class="value">
+                {{ $salary->employee->first_name }} {{ $salary->employee->last_name }}
+            </td>
 
-    <div class="row">
-        <span class="label">Designation:</span>
-        <span class="value">{{ $salary->employee->designation ?? 'N/A' }}</span>
-    </div>
+            <td class="label">Employee ID</td>
+            <td class="value">
+                EMP-{{ str_pad($salary->employee->id, 4, '0', STR_PAD_LEFT) }}
+            </td>
+        </tr>
+
+        <tr>
+            <td class="label">Designation</td>
+            <td class="value">{{ $salary->employee->designation ?? 'N/A' }}</td>
+
+            <td class="label">Working Days</td>
+            <td class="value">{{ $salary->working_days }}</td>
+        </tr>
+    </table>
 
     <!-- SALARY DETAILS -->
-    <table>
+    <div class="section-title">Salary Details</div>
+
+    <table class="salary">
         <tr>
             <th>Description</th>
             <th>Amount</th>
         </tr>
 
         <tr>
-            <td>Leaves Days</td>
-            <td>{{ $salary->leaves }}</td>
-        </tr>
-        <tr>
             <td>Present Days</td>
             <td>{{ $salary->present_days }}</td>
         </tr>
+
         <tr>
-            <td>Working Days</td>
-            <td>{{ $salary->working_days }}</td>
+            <td>Leave Days</td>
+            <td>{{ $salary->leaves }}</td>
         </tr>
+
         <tr>
-            <td>Absent</td>
+            <td>Absent Days</td>
             <td>{{ $salary->absent_days }}</td>
         </tr>
 
         <tr>
             <td>Gross Salary</td>
-            <td>{{ number_format($salary->gross_salary, 2) }}</td>
+            <td>
+                {{ config('app.currency_symbol', 'PKR') }}
+                {{ number_format($salary->gross_salary, 2) }}
+            </td>
         </tr>
 
         <tr>
-            <td>Deduction</td>
-            <td>{{ number_format($salary->deduction, 2) }}</td>
+            <td>Deductions</td>
+            <td>
+                {{ config('app.currency_symbol', 'PKR') }}
+                {{ number_format($salary->deduction, 2) }}
+            </td>
         </tr>
 
         <tr class="total">
             <td>Net Salary</td>
-            <td>{{ number_format($salary->net_salary, 2) }}</td>
+            <td>
+                {{ config('app.currency_symbol', 'PKR') }}
+                {{ number_format($salary->net_salary, 2) }}
+            </td>
         </tr>
     </table>
 
     <!-- FOOTER -->
-    <!-- <div class="footer">
-        This is a computer generated salary slip.  
+    <div class="footer">
+        This is a system generated salary slip.<br>
         No signature is required.
-    </div> -->
+    </div>
 
 </div>
 

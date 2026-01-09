@@ -48,6 +48,18 @@ class AttendanceController extends Controller
         ]);
 
         $today = Carbon::now('Asia/Karachi')->toDateString();
+        $employee = Employee::findOrFail($request->employee_id);
+
+            // Check if employee is on approved leave today
+        $leaveExists = $employee->leaves()
+            ->where('status', 'Approved')
+            ->whereDate('start_date', '<=', $today)
+            ->whereDate('end_date', '>=', $today)
+            ->exists();
+
+        if ($leaveExists) {
+            return back()->with('error', 'Cannot mark attendance. Employee is on approved leave today!');
+        }
 
         //  Check for weekend
         if (in_array(Carbon::parse($today)->dayOfWeek, [Carbon::SUNDAY])) {

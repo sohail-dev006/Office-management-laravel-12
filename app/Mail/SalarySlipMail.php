@@ -17,7 +17,8 @@ class SalarySlipMail extends Mailable implements ShouldQueue
 
     public function __construct(Salary $salary)
     {
-        $this->salary = $salary;
+
+        $this->salary = $salary->load('employee');
     }
 
     public function build()
@@ -27,11 +28,16 @@ class SalarySlipMail extends Mailable implements ShouldQueue
         ]);
 
         return $this->subject('Your Salary Slip')
-            ->view('emails.salary')
+            ->view('emails.salary-slip') 
+            ->with([
+                'salary' => $this->salary
+            ])
             ->attachData(
                 $pdf->output(),
                 'salary-slip-'.$this->salary->month.'-'.$this->salary->year.'.pdf',
-                ['mime' => 'application/pdf']
+                [
+                    'mime' => 'application/pdf'
+                ]
             );
     }
 }
