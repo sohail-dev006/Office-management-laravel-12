@@ -29,7 +29,11 @@
                     <tbody>
                     @foreach($leaves as $leave)
                         <tr class="text-white">
-                            <td>{{ $leave->employee->first_name }} {{ $leave->employee->last_name }}</td>
+                            <td>
+                                {{ $leave->employee?->first_name ?? 'Deleted' }} 
+                                {{ $leave->employee?->last_name ?? '' }}
+                            </td>
+
                             <td>{{ $leave->leave_type }}</td> 
                             <td>{{ $leave->start_date }}</td>
                             <td>{{ $leave->end_date }}</td>

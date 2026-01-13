@@ -30,10 +30,18 @@ class SalaryController extends Controller
         ->where('month', $month)
         ->where('year', $year);
 
-    // ✅ Agar admin nahi hai → sirf apni salary
+
     if (!$user->hasRole('admin')) {
         $query->whereHas('employee', function ($q) use ($user) {
             $q->where('user_id', $user->id);
+        });
+    }
+        if ($request->filled('search')) {
+        $search = $request->search;
+        $query->whereHas('employee', function($q) use ($search) {
+            $q->where('first_name', 'like', "%{$search}%")
+              ->orWhere('last_name', 'like', "%{$search}%")
+              ->orWhere('email', 'like', "%{$search}%");
         });
     }
 
@@ -56,90 +64,154 @@ class SalaryController extends Controller
         return view('salary.create', compact('employees'));
     }
 
-    // Store new salary
+
     // public function store(Request $request)
     // {
     //     $data = $request->validate([
     //         'employee_id' => 'required|exists:employees,id',
     //         'month' => 'required|numeric|min:1|max:12',
     //         'year' => 'required|numeric|min:2000',
-    //         'gross_salary' => 'required|numeric|min:0',
     //     ]);
 
     //     $employee = Employee::findOrFail($data['employee_id']);
+
     //     $workingDays = $this->workingDays($data['month'], $data['year']);
 
-    //     // For simplicity, deduction = 0 for now
-    //     $deduction = 0;
-    //     $netSalary = $data['gross_salary'] - $deduction;
 
-    //     Salary::create([
-    //         'employee_id' => $employee->id,
-    //         'month' => $data['month'],
-    //         'year' => $data['year'],
-    //         'working_days' => $workingDays,
-    //         'present_days' => 0,
-    //         'absent_days' => 0,
-    //         'gross_salary' => $data['gross_salary'],
-    //         'deduction' => $deduction,
-    //         'net_salary' => $netSalary,
-    //     ]);
+    //     $presentDays = $employee->attendances()
+    //         ->whereMonth('date', $data['month'])
+    //         ->whereYear('date', $data['year'])
+    //         ->count();
 
-    //     return redirect()->route('salary.index')->with('success', 'Salary created successfully!');
+        
+    //     $leaveDays = $employee->leaves()
+    //         ->where('status', 'Approved')
+    //         ->whereMonth('start_date', $data['month'])
+    //         ->whereYear('start_date', $data['year'])
+    //         ->sum('days_requested');
+
+    //     $absentDays = max(0, $workingDays - ($presentDays + $leaveDays));
+
+    //     $grossSalary = $employee->salary;
+    //     $dailySalary = $grossSalary / $workingDays;
+    //     $deduction = $absentDays * $dailySalary;
+    //     $netSalary = $grossSalary - $deduction;
+
+    //     Salary::updateOrCreate(
+    //         [
+    //             'employee_id' => $employee->id,
+    //             'month' => $data['month'],
+    //             'year' => $data['year'],
+    //         ],
+    //         [
+    //             'working_days' => $workingDays,
+    //             'present_days' => $presentDays,
+    //             'absent_days' => $absentDays,
+    //             'gross_salary' => $grossSalary,
+    //             'deduction' => $deduction,
+    //             'net_salary' => $netSalary,
+    //             'leaves' => $leaveDays,
+    //         ]
+    //     );
+
+    //     return redirect()->route('salary.index')
+    //         ->with('success', 'Salary calculated & saved successfully!');
     // }
 
     public function store(Request $request)
-    {
-        $data = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
-            'month' => 'required|numeric|min:1|max:12',
-            'year' => 'required|numeric|min:2000',
-        ]);
+{
+    $data = $request->validate([
+        'employee_id' => 'required|exists:employees,id',
+        'month' => 'required|numeric|min:1|max:12',
+        'year' => 'required|numeric|min:2000',
 
-        $employee = Employee::findOrFail($data['employee_id']);
+        // earnings
+        'basic_salary' => 'required|numeric|min:0',
+        'house_allowance' => 'nullable|numeric|min:0',
+        'medical_allowance' => 'nullable|numeric|min:0',
+        'transport_allowance' => 'nullable|numeric|min:0',
+        'other_allowance' => 'nullable|numeric|min:0',
+        'bonus' => 'nullable|numeric|min:0',
 
-        $workingDays = $this->workingDays($data['month'], $data['year']);
+        // deductions
+        'advance_salary' => 'nullable|numeric|min:0',
+        'tax' => 'nullable|numeric|min:0',
+        'other_deduction' => 'nullable|numeric|min:0',
+    ]);
 
+    $employee = Employee::findOrFail($data['employee_id']);
 
-        $presentDays = $employee->attendances()
-            ->whereMonth('date', $data['month'])
-            ->whereYear('date', $data['year'])
-            ->count();
+    $workingDays = $this->workingDays($data['month'], $data['year']);
 
-        
-        $leaveDays = $employee->leaves()
-            ->where('status', 'Approved')
-            ->whereMonth('start_date', $data['month'])
-            ->whereYear('start_date', $data['year'])
-            ->sum('days_requested');
+    $presentDays = $employee->attendances()
+        ->whereMonth('date', $data['month'])
+        ->whereYear('date', $data['year'])
+        ->count();
 
-        $absentDays = max(0, $workingDays - ($presentDays + $leaveDays));
+    $leaveDays = $employee->leaves()
+        ->where('status', 'Approved')
+        ->whereMonth('start_date', $data['month'])
+        ->whereYear('start_date', $data['year'])
+        ->sum('days_requested');
 
-        $grossSalary = $employee->salary;
-        $dailySalary = $grossSalary / $workingDays;
-        $deduction = $absentDays * $dailySalary;
-        $netSalary = $grossSalary - $deduction;
+    $absentDays = max(0, $workingDays - ($presentDays + $leaveDays));
 
-        Salary::updateOrCreate(
-            [
-                'employee_id' => $employee->id,
-                'month' => $data['month'],
-                'year' => $data['year'],
-            ],
-            [
-                'working_days' => $workingDays,
-                'present_days' => $presentDays,
-                'absent_days' => $absentDays,
-                'gross_salary' => $grossSalary,
-                'deduction' => $deduction,
-                'net_salary' => $netSalary,
-                'leaves' => $leaveDays,
-            ]
-        );
+    // ✅ Earnings
+    $grossSalary =
+        $data['basic_salary'] +
+        ($data['house_allowance'] ?? 0) +
+        ($data['medical_allowance'] ?? 0) +
+        ($data['transport_allowance'] ?? 0) +
+        ($data['other_allowance'] ?? 0) +
+        ($data['bonus'] ?? 0);
 
-        return redirect()->route('salary.index')
-            ->with('success', 'Salary calculated & saved successfully!');
-    }
+    // Absent deduction (auto)
+    $dailySalary = $grossSalary / $workingDays;
+    $absentDeduction = $absentDays * $dailySalary;
+
+    // ✅ Deductions
+    $totalDeductions =
+        $absentDeduction +
+        ($data['advance_salary'] ?? 0) +
+        ($data['tax'] ?? 0) +
+        ($data['other_deduction'] ?? 0);
+
+    $netSalary = $grossSalary - $totalDeductions;
+
+    Salary::updateOrCreate(
+        [
+            'employee_id' => $employee->id,
+            'month' => $data['month'],
+            'year' => $data['year'],
+        ],
+        [
+            'working_days' => $workingDays,
+            'present_days' => $presentDays,
+            'absent_days' => $absentDays,
+            'leaves' => $leaveDays,
+
+            'basic_salary' => $data['basic_salary'],
+            'house_allowance' => $data['house_allowance'] ?? 0,
+            'medical_allowance' => $data['medical_allowance'] ?? 0,
+            'transport_allowance' => $data['transport_allowance'] ?? 0,
+            'other_allowance' => $data['other_allowance'] ?? 0,
+            'bonus' => $data['bonus'] ?? 0,
+
+            'advance_salary' => $data['advance_salary'] ?? 0,
+            'tax' => $data['tax'] ?? 0,
+            'other_deduction' => $data['other_deduction'] ?? 0,
+
+            'gross_salary' => $grossSalary,
+            'deduction' => $absentDeduction,
+            'total_deductions' => $totalDeductions,
+            'net_salary' => $netSalary,
+        ]
+    );
+
+    return redirect()->route('salary.index')
+        ->with('success', 'Salary calculated & saved successfully!');
+}
+
 
 
 

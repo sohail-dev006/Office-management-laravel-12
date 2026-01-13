@@ -8,6 +8,7 @@ use App\Http\Controllers\SalaryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\UserPermissionController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Mail;
 
 Route::get('/', function () {
     return view('welcome');
@@ -51,6 +52,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/employees/create', [EmployeeController::class, 'create'])
         ->middleware('permission:add-employee')
         ->name('employee.create');
+    Route::get('/employees/{employee}', [EmployeeController::class, 'show'])
+    ->middleware('permission:view-employee') 
+    ->name('employee.show');
 
     Route::post('/employees', [EmployeeController::class, 'store'])
         ->middleware('permission:add-employee')
@@ -78,7 +82,19 @@ Route::middleware(['auth','permission:add-leave'])->resource('leaves', LeaveCont
     ->parameters(['leaves' => 'leave']);
 Route::middleware(['auth','permission:add-salary'])->resource('salary', SalaryController::class);
 
+Route::middleware(['auth'])->group(function () {
+    Route::resource('attendance', AttendanceController::class);
+    Route::post('attendance/checkin/{employee}',[AttendanceController::class,'checkIn']);
+    Route::post('attendance/checkout/{employee}',[AttendanceController::class,'checkOut']);
+});
+Route::get('/test-mail', function () {
+    Mail::raw('Mailtrap Test Email', function ($message) {
+        $message->to('test@test.com')
+                ->subject('Test Mail');
+    });
 
+    return 'Mail sent';
+});
 // Admin routes
 Route::middleware(['auth','role:admin'])->group(function () {
     Route::get('/admin/users', [UserPermissionController::class,'index'])->name('admin.users');

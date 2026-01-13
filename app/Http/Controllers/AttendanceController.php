@@ -6,27 +6,23 @@ use App\Models\Attendance;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-
+use Illuminate\Support\Facades\Mail;
+use App\Mail\EmployeeAttendanceMail;
+use App\Models\User;
 
 class AttendanceController extends Controller
 {
+    // List Attendance
     public function index()
     {
         $user = auth()->user();
 
         if ($user->hasRole('admin')) {
-           
-            $attendances = Attendance::with('employee')
-                ->orderBy('date', 'desc')
-                ->get();
+            $attendances = Attendance::with('employee')->latest()->get();
         } else {
-        
-            $attendances = Attendance::with('employee')
-                ->whereHas('employee', function ($query) use ($user) {
-                    $query->where('user_id', $user->id);
-                })
-                ->orderBy('date', 'desc')
-                ->get();
+            $attendances = Attendance::whereHas('employee', fn($q) =>
+                $q->where('user_id', $user->id)
+            )->latest()->get();
         }
 
         return view('attendance.index', compact('attendances'));
@@ -36,18 +32,9 @@ class AttendanceController extends Controller
     public function create()
     {
         $user = auth()->user();
-
-        if ($user->hasRole('admin')) {
-            // Admin sees all employees
-            $employees = Employee::all();
-        } else {
-            // Regular user sees only themselves
-            $employees = Employee::where('user_id', $user->id)->get();
-        }
-
+        $employees = $user->hasRole('admin') ? Employee::all() : Employee::where('user_id', $user->id)->get();
         return view('attendance.create', compact('employees'));
     }
-
 
 
     public function store(Request $request)
@@ -57,100 +44,135 @@ class AttendanceController extends Controller
             'date' => 'required|date|in:' . Carbon::now('Asia/Karachi')->toDateString(),
         ]);
 
-        $today = Carbon::now('Asia/Karachi')->toDateString();
         $employee = Employee::findOrFail($request->employee_id);
+        $today = Carbon::now('Asia/Karachi')->toDateString();
 
-            // Check if employee is on approved leave today
-        $leaveExists = $employee->leaves()
-            ->where('status', 'Approved')
-            ->whereDate('start_date', '<=', $today)
-            ->whereDate('end_date', '>=', $today)
-            ->exists();
 
-        if ($leaveExists) {
-            return back()->with('error', 'Cannot mark attendance. Employee is on approved leave today!');
-        }
-
-        //  Check for weekend
-        if (in_array(Carbon::parse($today)->dayOfWeek, [Carbon::SUNDAY])) {
-            return back()->with('error', 'Cannot mark attendance on weekends!');
-        }
-
-        //  Check for holiday
-        $holidays = [
-            '2025-01-01',
-            '2025-12-25',
-            // Add more holidays here
-        ];
-        if (in_array($today, $holidays)) {
-            return back()->with('error', 'Cannot mark attendance on holidays!');
-        }
-
-        //  Check if already marked
-        $alreadyMarked = Attendance::where('employee_id', $request->employee_id)
-            ->where('date', $today)
-            ->exists();
-
-        if ($alreadyMarked) {
-            return back()->with('error', 'Attendance already marked for today!');
+        if (Attendance::where('employee_id', $employee->id)->whereDate('date', $today)->exists()) {
+            return back()->with('error', 'Attendance already marked today!');
         }
 
         $checkInTime = Carbon::now('Asia/Karachi');
-        $lateTime = Carbon::now('Asia/Karachi')->setTime(10, 30);
+        $lateTime = Carbon::now('Asia/Karachi')->setTime(10, 0); // Office start time
         $status = $checkInTime->gt($lateTime) ? 'late' : 'present';
 
-        Attendance::create([
-            'employee_id' => $request->employee_id,
+
+        $attendance = Attendance::create([
+            'employee_id' => $employee->id,
             'date' => $today,
-            'check_in' => $checkInTime->format('H:i:s'),
-            'status' => $status,
+            'check_in' => $checkInTime,
+            'status' => $status
         ]);
+
+
+        if ($employee->user && $employee->user->email) {
+            Mail::to($employee->user->email)->send(new EmployeeAttendanceMail($attendance));
+        }
+
 
         if ($status === 'late') {
             $lateDuration = $lateTime->diff($checkInTime);
             $lateString = $lateDuration->format('%h hours %i minutes');
-            return back()->with('success', "Attendance saved! Employee is late by {$lateString}.");
+            return back()->with('error', "Attendance marked! Employee is late by {$lateString}.");
         }
 
-        return redirect()
-            ->route('attendance.index')
-            ->with('success', 'Attendance marked successfully!');
+        return back()->with('success', 'Attendance marked successfully on time!');
     }
-
 
 
 
     public function checkIn(Employee $employee)
     {
-        $today = Carbon::now('Asia/Karachi')->toDateString();
+        $today = today('Asia/Karachi');
 
-        // Check if already checked in
-        if (Attendance::where('employee_id', $employee->id)->where('date', $today)->exists()) {
-            return back()->with('error', 'Already checked in today!');
+
+        if (Attendance::where('employee_id', $employee->id)->whereDate('date', $today)->exists()) {
+            return back()->with('error', 'Already checked in today');
         }
 
-        $now = Carbon::now('Asia/Karachi');
-        $officeStart = Carbon::now('Asia/Karachi')->setTime(10, 30);
+        $now = now('Asia/Karachi');
+        $officeTime = Carbon::parse('10:20'); 
 
-        // Determine status
-        $status = $now->gt($officeStart) ? 'late' : 'present';
-
-        // Save attendance
-        Attendance::create([
+ 
+        $attendance = Attendance::create([
             'employee_id' => $employee->id,
             'date' => $today,
-            'check_in' => $now->format('H:i:s'),
-            'status' => $status,
+            'check_in' => $now,
+            'status' => $now->gt($officeTime) ? 'late' : 'present'
         ]);
 
-        // If late, calculate duration
-        if ($status === 'late') {
-            $lateDuration = $officeStart->diff($now);
-            $lateString = $lateDuration->format('%h hours %i minutes');
-            return back()->with('success', "Check-in recorded! Employee is late by {$lateString}.");
+
+        if ($employee->user && $employee->user->email) {
+            Mail::to($employee->user->email)
+                ->queue(new EmployeeAttendanceMail($attendance));
         }
 
-        return back()->with('success', 'Check-in recorded on time!');
+ 
+        $adminEmails = User::role('admin')->pluck('email')->array();
+        if ($adminEmails->isNotEmpty()) {
+            Mail::to($adminEmails)
+                ->queue(new EmployeeAttendanceMail($attendance));
+        }
+
+        // Late duration message
+        if ($now->gt($officeTime)) {
+            $lateDuration = $officeTime->diff($now);
+            $lateString = $lateDuration->format('%h hours %i minutes');
+            return back()->with('success', "Check-in successful! Employee is late by {$lateString}.");
+        }
+
+        return back()->with('success', 'Check-in successful on time!');
     }
 
+
+
+    public function checkOut(Employee $employee)
+    {
+        $attendance = Attendance::where('employee_id', $employee->id)
+            ->whereDate('date', today('Asia/Karachi'))
+            ->firstOrFail();
+
+        if ($attendance->check_out) {
+            return back()->with('error','Already checked out');
+        }
+
+        $out = now('Asia/Karachi');
+        $minutes = Carbon::parse($attendance->check_in)->diffInMinutes($out);
+
+        $attendance->update([
+            'check_out' => $out,
+            'working_minutes' => $minutes
+        ]);
+
+        $this->lateFine($employee);
+
+        if ($employee->user && $employee->user->email) {
+            Mail::to($employee->user->email)
+                ->queue(new EmployeeAttendanceMail($attendance));
+        }
+
+        $admins = \App\Models\User::role('admin')->pluck('email');
+        foreach ($admins as $adminEmail) {
+            Mail::to($adminEmail)
+                ->queue(new EmployeeAttendanceMail($attendance));
+        }
+
+        return back()->with('success','Check-out successful!');
+    }
+
+
+    private function lateFine(Employee $employee)
+    {
+        $lates = Attendance::where('employee_id', $employee->id)
+            ->where('status', 'late')
+            ->latest()
+            ->take(3)
+            ->get();
+
+        if ($lates->count() == 3) {
+            foreach ($lates as $l) {
+                $l->update(['is_fined' => true]);
+            }
+        }
+    }
 }

@@ -10,12 +10,21 @@ class PermissionSeeder extends Seeder
 {
     public function run(): void
     {
+
+
+        // ===== CREATE ROLES FIRST =====
+        $adminRole = Role::firstOrCreate([
+            'name' => 'admin',
+            'guard_name' => 'web'
+        ]);
+
         $permissions = [
             ['module'=>'Dashboard','name'=>'view-dashboard','guard_name'=>'web'],
             ['module'=>'Dashboard','name'=>'dashboard','guard_name'=>'web'],
 
             ['module'=>'Employee','name'=>'add-employee','guard_name'=>'web'],
             ['module'=>'Employee','name'=>'employee-list','guard_name'=>'web'],
+            ['module'=>'Employee','name'=>'view-employee','guard_name'=>'web'],
             ['module'=>'Employee','name'=>'edit-employee','guard_name'=>'web'],
             ['module'=>'Employee','name'=>'delete-employee','guard_name'=>'web'],
 

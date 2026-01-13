@@ -1,1 +1,45 @@
 @import "bootstrap/dist/css/bootstrap.min.css";
+.persona-card {
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.persona-header {
+    background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+    min-height: 260px;
+}
+
+.persona-photo {
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.persona-photo img {
+    width: 160px;
+    height: 160px;
+    object-fit: cover;
+    border: 5px solid #fff;
+}
+
+.avatar-circle {
+    width: 160px;
+    height: 160px;
+    background: #0d6efd;
+    color: #fff;
+    font-size: 64px;
+    font-weight: bold;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-pills .nav-link {
+    border-radius: 30px;
+}
+
+.nav-pills .nav-link.active {
+    background: #0d6efd;
+}

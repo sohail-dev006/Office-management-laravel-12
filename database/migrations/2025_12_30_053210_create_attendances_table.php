@@ -17,9 +17,12 @@ return new class extends Migration
             $table->date('date');
             $table->time('check_in')->nullable();
             $table->time('check_out')->nullable();
-            $table->enum('status', ['present', 'late', 'absent'])->default('absent');
+            $table->integer('working_minutes')->nullable();
+            $table->boolean('is_fined')->default(false);
+            $table->enum('status',['present','late','absent'])->default('absent');
             $table->timestamps();
         });
+
     }
 
     /**

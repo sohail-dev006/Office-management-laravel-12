@@ -19,6 +19,15 @@
                 </div>
             </div>
 
+            <!-- SEARCH FORM -->
+            <form method="GET" action="{{ route('salary.index') }}" class="mt-3">
+                <div class="input-group mb-3">
+                    <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Search by Employee Name or Email">
+                    <button class="btn btn-primary" type="submit">Search</button>
+                    <a href="{{ route('salary.index', ['month'=>$month,'year'=>$year]) }}" class="btn btn-secondary">Reset</a>
+                </div>
+            </form>
+
             <!-- TABLE -->
             <div class="table-responsive mt-3">
                 <table class="table table-bordered">
@@ -26,75 +35,37 @@
                         <tr>
                             <th>Employee</th>
                             <th>Month</th>
-                            <th>Working Days</th>
-                            <th>Present</th>
-                            <th>Absent</th>
                             <th>Gross</th>
-                            <th>Deduction</th>
+                            <th>Allowance</th>
+                            <th>Bonus</th>
+                            <th>OT</th>
+                            <th>Advance</th>
+                            <th>Tax</th>
                             <th>Net</th>
-                            @role('admin')
-                                <th>Action</th>
-                            @endrole
+                            <th>Action</th>
                         </tr>
-                    </thead>
+                        </thead>
 
-                    <tbody>
-                        @forelse($salaries as $salary)
+                        <tbody>
+                        @foreach($salaries as $salary)
                         <tr class="text-white">
-                            <td>
-                                {{ $salary->employee->first_name }}
-                                {{ $salary->employee->last_name }}
-                            </td>
-
+                            <td>{{ $salary->employee?->first_name }} {{ $salary->employee?->last_name }}</td>
                             <td>{{ $salary->month }}/{{ $salary->year }}</td>
+                            <td>{{ number_format($salary->gross_salary,2) }}</td>
+                            <td>{{ number_format($salary->allowance,2) }}</td>
+                            <td>{{ number_format($salary->bonus,2) }}</td>
+                            <td>{{ number_format($salary->overtime,2) }}</td>
+                            <td>{{ number_format($salary->advance,2) }}</td>
+                            <td>{{ number_format($salary->tax,2) }}</td>
+                            <td class="fw-bold">{{ number_format($salary->net_salary,2) }}</td>
 
-                            <td>{{ $salary->working_days }}</td>
-
-                            <td>{{ $salary->present_days }}</td>
-
-                            <td>{{ $salary->absent_days }}</td>
-
-                            <td>{{ number_format($salary->gross_salary, 2) }}</td>
-
-                            <td>{{ number_format($salary->deduction, 2) }}</td>
-
-                            <td class="fw-bold">
-                                {{ number_format($salary->net_salary, 2) }}
-                            </td>
-
-                            @role('admin')
                             <td>
-                                <a href="{{ route('salary.pdf', $salary) }}"
-                                   class="btn btn-sm btn-info mb-1">
-                                    PDF
-                                </a>
-
-                                <a href="{{ route('salary.edit', $salary) }}"
-                                   class="btn btn-sm btn-warning mb-1">
-                                    Edit
-                                </a>
-
-                                <form action="{{ route('salary.destroy', $salary) }}"
-                                      method="POST"
-                                      class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-sm btn-danger"
-                                        onclick="return confirm('Are you sure?')">
-                                        Delete
-                                    </button>
-                                </form>
-                            </td>
-                            @endrole
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="9" class="text-center text-white">
-                                No salary records found
+                                <a href="{{ route('salary.pdf',$salary) }}" class="btn btn-info btn-sm">PDF</a>
+                                <a href="{{ route('salary.edit',$salary) }}" class="btn btn-warning btn-sm">Edit</a>
                             </td>
                         </tr>
-                        @endforelse
-                    </tbody>
+                        @endforeach
+                        </tbody>
 
                 </table>
             </div>

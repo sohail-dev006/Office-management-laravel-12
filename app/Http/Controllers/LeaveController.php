@@ -30,6 +30,7 @@ class LeaveController extends Controller
                 ->orderBy('start_date', 'desc') // use correct column
                 ->get();
         }
+        
 
         return view('leaves.index', compact('leaves'));
     }

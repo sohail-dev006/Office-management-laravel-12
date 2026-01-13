@@ -51,6 +51,11 @@ class StoreEmployeeRequest extends FormRequest
             'status'     => ['required', Rule::in(['active','inactive'])],
             'age'        => ['required', 'integer'],
             // 'min:18'
+            'documents'               => 'nullable|array',
+'documents.*.type'        => 'required|string',
+'documents.*.file'        => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
+
+            
         ];
     }
 }
