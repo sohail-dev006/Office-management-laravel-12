@@ -103,41 +103,61 @@ class LeaveController extends Controller
     // }
 
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'employee_id' => 'required|exists:employees,id',
-            'start_date' => 'required|date|after_or_equal:today',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'days_requested' => 'required|numeric',
-            'leave_type' => 'required|string|in:Casual,Sick,Earned,Holiday',
-            'reason' => 'required|string',
-        ]);
+{
+    $validated = $request->validate([
+        'employee_id' => 'required|exists:employees,id',
+        'start_date' => 'required|date|after_or_equal:today',
+        'end_date' => 'required|date|after_or_equal:start_date',
+        'days_requested' => 'required|numeric',
+        'leave_type' => 'required|string|in:Casual,Sick,Earned,Holiday,Paid',
+        'reason' => 'required|string',
+    ]);
 
-        $validated['status'] = 'Pending'; 
+    $validated['status'] = 'Pending'; 
+    $employee = Employee::findOrFail($validated['employee_id']);
 
-        $employee = Employee::findOrFail($validated['employee_id']);
+    // ✅ Check if attendance exists for selected dates
+    $attendanceExists = $employee->attendances()
+        ->whereBetween('date', [
+            $validated['start_date'],
+            $validated['end_date']
+        ])->exists();
 
-        $attendanceExists = $employee->attendances()
-            ->whereBetween('date', [
-                $validated['start_date'],
-                $validated['end_date']
-            ])
-            ->exists();
+    if ($attendanceExists) {
+        return back()
+            ->withInput()
+            ->withErrors([
+                'start_date' => 'Attendance already marked for selected dates.'
+            ]);
+    }
 
-        if ($attendanceExists) {
+    // ✅ Check monthly paid leave limit
+    if ($validated['leave_type'] === 'Paid') {
+        $monthStart = Carbon::parse($validated['start_date'])->startOfMonth();
+        $monthEnd = Carbon::parse($validated['start_date'])->endOfMonth();
+
+        $paidLeavesThisMonth = $employee->leaves()
+            ->where('leave_type', 'Paid')
+            ->whereBetween('start_date', [$monthStart, $monthEnd])
+            ->count();
+
+        if ($paidLeavesThisMonth >= 1) {
             return back()
                 ->withInput()
                 ->withErrors([
-                    'start_date' => 'Attendance already marked for selected dates.'
+                    'start_date' => 'Employee already has 1 Paid Leave this month.'
                 ]);
         }
-
-        Leave::create($validated); 
-
-        return redirect()
-            ->route('leaves.index')
-            ->with('success', 'Leave applied successfully!');
     }
+
+    // ✅ Create leave
+    Leave::create($validated); 
+
+    return redirect()
+        ->route('leaves.index')
+        ->with('success', 'Leave applied successfully!');
+}
+
 
 
 

@@ -47,6 +47,15 @@ class AttendanceController extends Controller
         $employee = Employee::findOrFail($request->employee_id);
         $today = Carbon::now('Asia/Karachi')->toDateString();
 
+            $onLeave = $employee->leaves()
+        ->where('status', 'Approved')
+        ->whereDate('start_date', '<=', $today)
+        ->whereDate('end_date', '>=', $today)
+        ->exists();
+
+        if ($onLeave) {
+            return back()->with('error', 'Cannot mark attendance. Employee is on approved leave today!');
+        }
 
         if (Attendance::where('employee_id', $employee->id)->whereDate('date', $today)->exists()) {
             return back()->with('error', 'Attendance already marked today!');
@@ -85,6 +94,16 @@ class AttendanceController extends Controller
     {
         $today = today('Asia/Karachi');
 
+
+        $onLeave = $employee->leaves()
+            ->where('status', 'Approved')
+            ->whereDate('start_date', '<=', $today)
+            ->whereDate('end_date', '>=', $today)
+            ->exists();
+
+        if ($onLeave) {
+            return back()->with('error', 'Cannot check in. Employee is on approved leave today!');
+        }
 
         if (Attendance::where('employee_id', $employee->id)->whereDate('date', $today)->exists()) {
             return back()->with('error', 'Already checked in today');

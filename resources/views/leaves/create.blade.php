@@ -55,6 +55,7 @@
                                 <option value="Casual" {{ old('leave_type') == 'Casual' ? 'selected' : '' }}>Casual</option>
                                 <option value="Sick" {{ old('leave_type') == 'Sick' ? 'selected' : '' }}>Sick</option>
                                 <option value="Earned" {{ old('leave_type') == 'Earned' ? 'selected' : '' }}>Earned</option>
+                                <option value="Paid" {{ old('leave_type') == 'Paid' ? 'selected' : '' }}>Paid</option>
                                 <option value="Holiday" {{ old('leave_type') == 'Holiday' ? 'selected' : '' }}>Holiday</option>
                             </select>
                             @error('leave_type')

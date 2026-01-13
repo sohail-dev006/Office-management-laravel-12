@@ -87,6 +87,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('attendance/checkin/{employee}',[AttendanceController::class,'checkIn']);
     Route::post('attendance/checkout/{employee}',[AttendanceController::class,'checkOut']);
 });
+
 Route::get('/test-mail', function () {
     Mail::raw('Mailtrap Test Email', function ($message) {
         $message->to('test@test.com')

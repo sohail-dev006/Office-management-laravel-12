@@ -4,8 +4,8 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Attendance;
-use App\Models\User;
 use App\Models\Employee;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\DailyAttendanceReport;
@@ -17,23 +17,22 @@ class SendDailyAttendanceReport extends Command
 
     public function handle()
     {
-        // Get date argument or default to today
-        $date = $this->argument('date') 
-            ? Carbon::parse($this->argument('date'), 'Asia/Karachi')->toDateString() 
+
+        $date = $this->argument('date')
+            ? Carbon::parse($this->argument('date'), 'Asia/Karachi')->toDateString()
             : Carbon::today('Asia/Karachi')->toDateString();
 
-        // Fetch all attendances for that date
-        $attendances = Attendance::with(['employee', 'employee.leaves'])
-                        ->whereDate('date', $date)
-                        ->get();
 
-        // Fetch employees with NO attendance for that date
+        $attendances = Attendance::with(['employee', 'employee.leaves'])
+            ->whereDate('date', $date)
+            ->get();
+
+
         $employeesWithNoAttendance = Employee::whereDoesntHave('attendances', function($q) use ($date) {
             $q->whereDate('date', $date);
         })->get();
 
-        foreach($employeesWithNoAttendance as $emp) {
-            // Check if employee is on leave
+        foreach ($employeesWithNoAttendance as $emp) {
             $leave = $emp->leaves()
                         ->where('status', 'Approved')
                         ->whereDate('start_date', '<=', $date)
@@ -51,12 +50,24 @@ class SendDailyAttendanceReport extends Command
             ]);
         }
 
-        // Get all admin emails
+        //  Convert to plain array for queue compatibility
+        $attendanceArray = $attendances->map(function($att) {
+            return [
+                'employee_name' => $att->employee->first_name . ' ' . ($att->employee->last_name ?? ''),
+                'check_in' => $att->check_in,
+                'check_out' => $att->check_out,
+                'working_hours' => $att->working_hours,
+                'status' => $att->status,
+                'leave_reason' => $att->leave?->reason ?? null,
+                'absent_reason' => $att->absent_reason ?? null,
+            ];
+        })->toArray();
+
         $admins = User::role('admin')->pluck('email')->toArray();
 
-        if(!empty($admins)) {
-            Mail::to($admins)->queue(new DailyAttendanceReport($attendances, $date));
-            $this->info("Daily attendance report queued for admins for {$date}.");
+        if (!empty($admins)) {
+            Mail::to($admins)->send(new DailyAttendanceReport($attendanceArray, $date));
+            $this->info("Daily attendance report sent to admins for {$date}.");
         } else {
             $this->info('No admin emails found.');
         }
