@@ -70,7 +70,6 @@ public function index(Request $request)
 
         $employee = Employee::create($data);
 
-
         // Save multiple documents
         if ($request->filled('documents')) {
             foreach ($request->documents as $doc) {

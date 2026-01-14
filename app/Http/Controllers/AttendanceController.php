@@ -48,10 +48,10 @@ class AttendanceController extends Controller
         $today = Carbon::now('Asia/Karachi')->toDateString();
 
             $onLeave = $employee->leaves()
-        ->where('status', 'Approved')
-        ->whereDate('start_date', '<=', $today)
-        ->whereDate('end_date', '>=', $today)
-        ->exists();
+            ->where('status', 'Approved')
+            ->whereDate('start_date', '<=', $today)
+            ->whereDate('end_date', '>=', $today)
+            ->exists();
 
         if ($onLeave) {
             return back()->with('error', 'Cannot mark attendance. Employee is on approved leave today!');

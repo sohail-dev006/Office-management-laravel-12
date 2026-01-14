@@ -43,6 +43,11 @@
             </a>
             @endrole
         </li>
+        {{-- <li class="nav-item">
+            <a href="{{ route('calender.index') }}" class="nav-link text-white {{ request()->routeIs('calender.*') ? 'active-link' : '' }}">
+                Calender
+            </a>
+        </li> --}}
 
     </ul>
 </div>

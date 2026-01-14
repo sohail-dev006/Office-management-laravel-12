@@ -28,13 +28,13 @@ class SalarySlipMail extends Mailable implements ShouldQueue
         ]);
 
         return $this->subject('Your Salary Slip')
-            ->view('emails.salary-slip') 
+            ->view('emails.salary') 
             ->with([
                 'salary' => $this->salary
             ])
             ->attachData(
                 $pdf->output(),
-                'salary-slip-'.$this->salary->month.'-'.$this->salary->year.'.pdf',
+                'salary-'.$this->salary->month.'-'.$this->salary->year.'.pdf',
                 [
                     'mime' => 'application/pdf'
                 ]
