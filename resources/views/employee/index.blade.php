@@ -17,24 +17,21 @@
                 @endcan
             </div>
 
-                @if ($errors->has('delete_error'))
-                    <div class="alert alert-danger">
-                        {{ $errors->first('delete_error') }}
-                    </div>
-                @endif
-            {{-- SEARCH FORM --}}
-            <form method="GET" action="{{ route('employee.index') }}" class="mb-3">
-                <div class="input-group">
-                    <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Search by Name or Email">
-                    <button class="btn btn-primary" type="submit">Search</button>
-                    <a href="{{ route('employee.index') }}" class="btn btn-secondary">Reset</a>
+            @if ($errors->has('delete_error'))
+                <div class="alert alert-danger">
+                    {{ $errors->first('delete_error') }}
                 </div>
-            </form>
+            @endif
+
+            {{-- Live Search Input --}}
+            <div class="mb-3">
+                <input type="text" id="employeeSearch" class="form-control" placeholder="Search by Name, Email, etc...">
+            </div>
 
             {{-- EMPLOYEE CARDS --}}
-            <div class="row g-3">
+            <div class="row g-3" id="employeeList">
                 @forelse($employees as $emp)
-                <div class="col-md-6 col-xl-4">
+                <div class="col-md-6 col-xl-4 employee-card">
                     <div class="card bg-dark text-white shadow h-100">
                         <div class="card-body">
 
@@ -44,10 +41,10 @@
                                 <div class="col-5 fw-bold text-white">Name:</div>
                                 <div class="col-7">{{ $emp->first_name }} {{ $emp->last_name }}</div>
                             </div>
-                            <div class="row mb-1">
+                            {{-- <div class="row mb-1">
                                 <div class="col-5 fw-bold text-white">Department:</div>
                                 <div class="col-7">{{ $emp->department ?? 'N/A' }}</div>
-                            </div>
+                            </div> --}}
                             <div class="row mb-1">
                                 <div class="col-5 fw-bold text-white">Designation:</div>
                                 <div class="col-7">{{ $emp->designation }}</div>
@@ -123,4 +120,19 @@
         </div>
     </div>
 </div>
+
+{{-- Live Search Script --}}
+<script>
+    const searchInput = document.getElementById('employeeSearch');
+    const employeeCards = document.querySelectorAll('#employeeList .employee-card');
+
+    searchInput.addEventListener('keyup', function() {
+        const filter = this.value.toLowerCase();
+
+        employeeCards.forEach(card => {
+            let text = card.innerText.toLowerCase();
+            card.style.display = text.includes(filter) ? '' : 'none';
+        });
+    });
+</script>
 </x-app-layout>

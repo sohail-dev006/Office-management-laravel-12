@@ -9,9 +9,14 @@
                 <a href="{{ route('leaves.create') }}" class="btn btn-primary">Apply Leave</a>
             </div>
 
+            <!-- Search Input -->
+            <div class="mb-3">
+                <input type="text" id="leaveSearch" class="form-control" placeholder="Search by employee, leave type, status, etc...">
+            </div>
+
             <div class="table-responsive">
-                <table class="table table-bordered table-striped">
-                    <thead class="table-dark">
+                <table class="table table-bordered table-striped" id="leaveTable">
+                    <thead class="table-dark text-white">
                         <tr>
                             <th>Employee</th>
                             <th>Leave Type</th> 
@@ -84,4 +89,28 @@
         </div>
     </div>
 </div>
+
+<!-- JS Filter -->
+<script>
+    const searchInput = document.getElementById('leaveSearch');
+    const tableRows = document.querySelectorAll('#leaveTable tbody tr');
+
+    searchInput.addEventListener('keyup', function() {
+        const filter = this.value.toLowerCase();
+
+        tableRows.forEach(row => {
+            let cells = row.querySelectorAll('td');
+            let match = false;
+
+            cells.forEach(cell => {
+                if(cell.innerText.toLowerCase().includes(filter)){
+                    match = true;
+                }
+            });
+
+            row.style.display = match ? '' : 'none';
+        });
+    });
+</script>
+
 </x-app-layout>

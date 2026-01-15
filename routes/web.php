@@ -9,6 +9,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\UserPermissionController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\EventController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -39,6 +40,7 @@ Route::middleware(['auth','permission:salary-list'])->group(function () {
     Route::post('/salary/generate', [SalaryController::class,'generate'])->name('salary.generate');
     Route::get('/salary/{salary}/pdf', [SalaryController::class,'pdf'])->name('salary.pdf');
     Route::delete('/salary/{salary}', [SalaryController::class,'destroy'])->name('salary.destroy');
+    Route::resource('salary', SalaryController::class);
 });
 
 
@@ -110,5 +112,26 @@ Route::middleware(['auth','role:admin'])->group(function () {
     ->middleware('can:edit-employee');
 
 });
+
+
+
+Route::get('/calendar', [EventController::class, 'index'])->name('calendar.index');
+Route::get('/calendar/fetch', [EventController::class, 'fetch'])->name('calendar.fetch');
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    // Route::post('/calendar', [EventController::class, 'store'])->name('calendar.store');
+    // Route::put('/calendar/{event}', [EventController::class, 'update']);
+    // Route::delete('/calendar/{event}', [EventController::class, 'destroy']);
+    // Route::post('/calendar/drag/{event}', [EventController::class, 'dragUpdate']);
+    Route::post('/calendar/store', [EventController::class, 'store'])->name('calendar.store');
+    Route::put('/calendar/update/{event}', [EventController::class, 'update']);
+    Route::delete('/calendar/delete/{event}', [EventController::class, 'destroy']);
+    Route::post('/calendar/drag/{event}', [EventController::class, 'dragUpdate']);
+});
+
+
+
+
+
 
 require __DIR__.'/auth.php';

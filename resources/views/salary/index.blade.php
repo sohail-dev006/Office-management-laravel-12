@@ -9,7 +9,9 @@
                     Salary Overview - {{ \Carbon\Carbon::create($year, $month, 1)->format('F Y') }}
                 </h2>
                 <div>
-                    <a href="{{ route('salary.create') }}" class="btn btn-success">+ Generate Salary</a>
+                    @can('add-salary')
+                     <a href="{{ route('salary.create') }}" class="btn btn-success">+ Generate Salary</a>
+                    @endcan
                     <a href="{{ route('employee.index') }}" class="btn btn-secondary">Back</a>
                 </div>
             </div>
@@ -89,7 +91,16 @@
                                 <!-- Action Buttons -->
                                 <div class="d-flex justify-content-end mt-3 gap-2">
                                     <a href="{{ route('salary.pdf',$salary) }}" class="btn btn-info btn-sm">PDF</a>
+                                    @can('edit-salary')
                                     <a href="{{ route('salary.edit',$salary) }}" class="btn btn-warning btn-sm">Edit</a>
+                                    @endcan
+                                    @can('delete-salary')
+                                    <form action="{{ route('salary.destroy', $salary) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-danger btn-sm" onclick="return confirm('Delete this salary?')">Delete</button>
+                                    </form>
+                                    @endcan
                                 </div>
 
                             </div>

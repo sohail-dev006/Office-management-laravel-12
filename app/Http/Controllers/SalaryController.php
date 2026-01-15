@@ -234,4 +234,17 @@ class SalaryController extends Controller
         $paid = min($paid, 1); // Only 1 paid leave per month
         return [$paid, $unpaid];
     }
+    // --- Delete Salary ---
+    public function destroy(Salary $salary)
+    {
+        // Permission check
+        if(!auth()->user()->can('delete-salary')){
+            abort(403, 'Unauthorized action.');
+        }
+
+        $salary->delete();
+
+        return redirect()->route('salary.index')->with('success', 'Salary deleted successfully!');
+    }
+
 }

@@ -48,6 +48,35 @@
                 Calender
             </a>
         </li> --}}
+        {{-- 🔥 CALENDAR SECTION --}}
+        <li class="nav-item mt-3">
+            <span class="text-uppercase text-muted px-2 small">Calendar</span>
+        </li>
+
+        {{-- Main Calendar --}}
+        <li class="nav-item">
+            <a href="{{ route('calendar.index') }}"
+               class="nav-link text-white ps-4 {{ request()->routeIs('calendar.index') ? 'active-link' : '' }}">
+                Calendar
+            </a>
+        </li>
+
+        {{-- Holidays --}}
+        <li class="nav-item">
+            <a href="{{ route('calendar.index', ['type' => 'holiday']) }}"
+               class="nav-link text-white ps-4 {{ request('type') == 'holiday' ? 'active-link' : '' }}">
+                Holidays
+            </a>
+        </li>
+
+        {{-- Events --}}
+        <li class="nav-item">
+            <a href="{{ route('calendar.index', ['type' => 'event']) }}"
+               class="nav-link text-white ps-4 {{ request('type') == 'event' ? 'active-link' : '' }}">
+                Events
+            </a>
+        </li>
+
 
     </ul>
 </div>
